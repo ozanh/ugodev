@@ -1,0 +1,125 @@
+/*
+  uGO Language
+*/
+
+a := 1      // int
+b := 2u     // uint
+c := 'c'    // char
+d := "text" // string
+e := 3.14   // float
+
+// compiled-function
+var fn = func(v) {
+  return v + "Playground"
+}
+
+var g = false               // bool
+h := error("error value")   // error
+
+println("a:", a, "b:", b, "c:", c, "d:", d, 
+  "e:", e, "f:", fn, "g:", "h:", h)
+
+println(fn("uGO "))
+
+// arrays
+
+arr := [a, b, c, d]
+arr = append(arr, e)
+
+for i, v in arr {
+    printf("arr[%d]=%+v\n", i, v)
+}
+/*
+for v in arr {
+    println(v)
+}
+*/
+
+// slicing
+var (s1 = arr[:2],
+     s2 = arr[2:])
+println("s1:", s1, "\ns2:", s2)
+println("hello world"[1:5])
+
+// sum given numbers
+sum := func(...nums) {
+  var total = 0
+  for i, v in nums {
+    total += nums[i]
+  }
+  return total
+}
+
+nums := [1, 2, 3, 4, 5, 6]
+println(sum(...nums))  // expand array
+println(len(nums))     // length of array
+ 
+var count_evens
+count_evens = func(n, c) {
+  if n == 0 {
+    return c
+  } else if n % 2 == 0 {
+    c++
+  }
+  return count_evens(n-1, c)
+}
+
+num_evens := count_evens(1984, 0)
+println(num_evens)
+
+// type coercion
+v1 := string(2018)    // "2018"
+v2 := int("2018")     // 2018
+v3 := int("0b101")    // 5
+v4 := float(-7)       // -7.0
+v5 := char(65)        // 'A'
+v6 := bool("abc")     // true
+
+func(...args) {
+  arr := repeat([undefined], len(args))
+  for i,v in args {
+    arr[i] = sprintf("%s:%s", typeName(v), v)
+  }
+  println(arr)
+}(v1, v2, v3, v4, v5, v6)
+
+// ternary operator
+v7 := v2 > v3 ? v2 << 1 : v2 >> 1
+println(v7)
+
+// create a map
+m := {a: 1, b: 2.0, c: string(v7), 
+      fn: func(x) { return x+1 }
+    }
+
+// use .key or ["key"] notations to access keys
+m.test = "test"
+m["test"] = "test"
+println(m)
+
+// invalid map index returns undefined
+if m.invalid == undefined {
+  println("OK")
+}
+
+// undefined values' indexes are undefined
+println(undefined.x.y)
+
+// get map index and call
+println(m.fn(10))
+
+// map iterations are randomized
+// iterate map and append map key and value to an array
+arr = []
+for k,v in m {
+  printf("key:%s value:%s\n", k, v)
+  arr = append(arr, k, v)
+}
+println(arr)
+
+// import stdlib time module
+time := import("time")
+// add 1 hour to now and print with RFC3339Nano layout
+println(time.Format(time.Now() + time.Hour, time.RFC3339Nano))
+
+return "End"

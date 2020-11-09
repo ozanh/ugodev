@@ -1,0 +1,120 @@
+{
+  "name": "ugo-playground",
+  "version": "0.1.0",
+  "private": true,
+  "description": "uGO Playground",
+  "author": {
+    "name": "Ozan Hacıbekiroğlu"
+  },
+  "scripts": {
+    "serve": "./build-go.bash development && vue-cli-service serve",
+    "build": "./build-go.bash production && vue-cli-service build",
+    "lint": "./build-go.bash development && vue-cli-service lint --fix",
+    "test:unit": "./build-go.bash test && vue-cli-service test:unit",
+    "test": "./build-go.bash test && vue-cli-service test:unit"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "core-js": "^3.7.0",
+    "prismjs": "git+https://github.com/ozanh/prism.git",
+    "vue": "^3.0.0",
+    "vue-prism-editor": "^2.0.0-alpha.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "^4.5.8",
+    "@vue/cli-plugin-unit-jest": "^4.5.8",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
+    "@vue/eslint-config-standard": "^5.1.2",
+    "@vue/test-utils": "^2.0.0-0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^26.6.3",
+    "eslint": "^6.7.2",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-vue": "^7.0.0-0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest-raw-loader": "^1.0.1",
+    "license-checker-webpack-plugin": "^0.1.5",
+    "raw-loader": "^4.0.2",
+    "regenerator-runtime": "^0.13.7",
+    "sass": "^1.29.0",
+    "sass-loader": "^10.0.5",
+    "typescript": "~3.9.3",
+    "vue-jest": "^5.0.0-0"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/recommended",
+      "eslint:recommended",
+      "@vue/standard"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "overrides": [
+      {
+        "files": [
+          "**/__tests__/*.{j,t}s?(x)",
+          "**/tests/unit/**/*.spec.{j,t}s?(x)"
+        ],
+        "env": {
+          "jest": true
+        }
+      }
+    ]
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "vue"
+    ],
+    "moduleNameMapper": {
+      ".+\\.(css|less)$": "identity-obj-proxy",
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "transform": {
+      ".*\\.(vue)$": "vue-jest",
+      ".*\\.(js|jsx)$": "babel-jest",
+      ".*\\.ugo$": "jest-raw-loader"
+    },
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ],
+    "testMatch": [
+      "<rootDir>/tests/unit/**.spec.js"
+    ],
+    "preset": "@vue/cli-plugin-unit-jest"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ]
+  },
+  "_id": "playground@0.1.0",
+  "keywords": [
+    "uGO"
+  ],
+  "license": "MIT",
+  "readme": "uGO Playground"
+}
