@@ -45,9 +45,9 @@ func (m *metrics) initExec() func() {
 
 func (m *metrics) output() map[string]interface{} {
 	return map[string]interface{}{
-		"elapsed": time.Since(m.start).String(),
-		"compile": m.compile.String(),
-		"exec":    m.exec.String(),
+		"elapsed": time.Since(m.start).Round(time.Microsecond).String(),
+		"compile": m.compile.Round(time.Microsecond).String(),
+		"exec":    m.exec.Round(time.Microsecond).String(),
 	}
 }
 
