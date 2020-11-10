@@ -8,24 +8,15 @@ if [ -z "$MODE" ]; then
 fi
 
 ENV_FILE=".env.$MODE.local"
-UGO_PATH="$(go env GOPATH)/src/github.com/ozanh/ugo"
 JS_WASM_EXEC="$(go env GOROOT)/misc/wasm/go_js_wasm_exec"
 
 if [ "$MODE" = "test" ]; then
-    pushd "cmd/wasm"
-    GOOS=js GOARCH=wasm go test -cover -exec="$JS_WASM_EXEC" .
-    popd
-fi
+    GOOS=js GOARCH=wasm go test -cover -exec="$JS_WASM_EXEC" \
+        github.com/ozanh/ugo/...
 
-pushd "$UGO_PATH"
-if [ "$MODE" = "test" ]; then
-    # find all packages in uGO and run tests except for cmd/ugo which is a terminal app.
-    find . -name '*.go' -printf '%h\n' | sort -u | grep -v "cmd/ugo" | \
-        GOOS=js GOARCH=wasm xargs -n1 -P1 go test -cover -exec="$JS_WASM_EXEC"
+    GOOS=js GOARCH=wasm go test -cover -exec="$JS_WASM_EXEC" \
+        github.com/ozanh/ugodev/playground/cmd/wasm
 fi
-popd
-
-mkdir -p dist/static
 
 # build & copy files and write env. vars to .env.[MODE].local file for Vue app
 rm -f ./.env.*.local
@@ -43,9 +34,8 @@ echo "VUE_APP_WASM_EXEC_FILE=$EXEC_FILE" > "$ENV_FILE"
 BUILD_TIME=$(date -u +'%Y-%m-%d_%T')
 rm -f ./ugo.*.wasm ./ugo.wasm
 
-pushd cmd/wasm
+UGO_PATH="$(go list -m -f {{.Dir}} github.com/ozanh/ugo)"
 UGO_VERSION="$(go list -m -f {{.Version}} github.com/ozanh/ugo)"
-popd
 
 # create ugo.wasm file in current working dir
 GOOS=js GOARCH=wasm go build -o ./ugo.wasm \
