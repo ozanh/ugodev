@@ -27,7 +27,7 @@ describe('Playground.vue', () => {
     const wrapper = mount(Playground, {
       props: { checkWASM: false }
     })
-    expect(wrapper.text()).toMatch(/Run\s+About\s+/)
+    expect(wrapper.text()).toMatch(/Run\s+.*\s+About\s+/)
     expect(wrapper.find('div.modal').exists()).toBe(false)
     await wrapper.find('#about-button').trigger('click')
     expect(wrapper.vm.showAboutModal).toBe(true)
