@@ -1,107 +1,94 @@
 <template>
   <div>
-    <div class="box head">
-      <div class="playground-text">
-        <strong>{{ msg }}</strong>
+    <div class="playground">
+      <div class="head">
+        <div class="playground-text">
+          <strong>{{ msg }}</strong>
+        </div>
+        <div class="head-buttons">
+          <button
+            id="run-button"
+            :disabled="loading"
+            class="button"
+            @click="onRun"
+          >
+            Run
+            <span class="key-press hidden-sm">Ctrl+↵</span>
+          </button>
+          <button
+            id="about-button"
+            class="button"
+            @click="showAboutModal = true"
+          >
+            About
+          </button>
+          <div class="loader-wrapper">
+            <div
+              v-show="loading"
+              class="loader"
+            />
+          </div>
+        </div>
+        <div class="head-gh hidden-sm">
+          <a
+            href="https://github.com/ozanh/ugo"
+            data-size="large"
+            class="github-button"
+            aria-label="Fork ozanh/ugo on GitHub"
+          >
+            Fork
+          </a>
+        </div>
+        <div class="copyright">
+          Copyright © 2020 Ozan Hacıbekiroğlu
+        </div>
       </div>
-      <div class="head-buttons">
-        <button
-          id="run-button"
-          :disabled="loading"
-          class="button"
-          @click="onRun"
-        >
-          Run
-          <span class="key-press">Ctrl+↵</span>
-        </button>
-        <button
-          id="about-button"
-          class="button"
-          @click="showAboutModal = true"
-        >
-          About
-        </button>
-        <div class="loader-wrapper">
+      <div class="body-container">
+        <prism-editor
+          v-model="code"
+          :highlight="highlighter"
+          line-numbers
+          class="playground-editor"
+          @input="edited = true"
+        />
+        <div class="result">
           <div
-            v-show="loading"
-            class="loader"
-          />
-        </div>
-      </div>
-      <div class="head-right-gh">
-        <a
-          href="https://github.com/ozanh/ugo"
-          data-size="large"
-          class="github-button"
-          aria-label="Fork ozanh/ugo on GitHub"
-        >
-          Fork
-        </a>
-      </div>
-      <div class="copyright">
-        Copyright © 2020 Ozan Hacıbekiroğlu
-      </div>
-    </div>
-    <div class="body-container">
-      <prism-editor
-        v-model="code"
-        :highlight="highlighter"
-        line-numbers
-        class="box playground-editor"
-        @keyup.ctrl.enter="onRun"
-      />
-      <div class="box result">
-        <div
-          v-if="result && result.error != ''"
-          class="result-error"
-        >
-          <pre>{{ result.error }}</pre>
-        </div>
-        <div
-          v-if="result && result.stdout != ''"
-          class="result-stdout"
-        >
-          <pre>{{ result.stdout }}</pre>
-        </div>
-        <div
-          v-if="result && result.value!=''"
-          class="result-value"
-        >
-          <strong>Return Value as JSON:</strong>
-          <pre v-text="valueToJSON(result.value)" />
-        </div>
-      </div>
-    </div>
-    <div class="footer">
-      <ul
-        v-if="result && result.metrics"
-        class="button-group metrics hidden-mob"
-      >
-        <li>
-          <button
-            class="button"
-            disabled
+            v-if="result && result.error != ''"
+            class="result-error"
           >
+            <pre>{{ result.error }}</pre>
+          </div>
+          <div
+            v-if="result && result.stdout != ''"
+            class="result-stdout"
+          >
+            <pre>{{ result.stdout }}</pre>
+          </div>
+          <div
+            v-if="result && result.value!=''"
+            class="result-value"
+          >
+            <strong>Return Value as JSON:</strong>
+            <pre v-text="valueToJSON(result.value)" />
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div
+          v-if="result && result.metrics"
+          class="metrics"
+        >
+          <span>
             Compile:{{ result.metrics.compile }}
-          </button>
-        </li>
-        <li>
-          <button
-            class="button"
-            disabled
-          >
+          </span>
+          <span>
             Exec:{{ result.metrics.exec }}
-          </button>
-        </li>
-        <li>
-          <button
-            class="button"
-            disabled
-          >
+          </span>
+          <span>
             Total:{{ result.metrics.elapsed }}
-          </button>
-        </li>
-      </ul>
+          </span>
+        </div>
+      </div>
     </div>
     <teleport to="body">
       <modal
@@ -210,14 +197,30 @@ export default {
     showWASMErrorModal: false,
     code: code,
     loading: true,
-    result: null
+    result: null,
+    edited: false
   }),
   mounted () {
-    if (global.window != null) {
-      window.addEventListener('beforeunload', function (e) {
-        e.preventDefault()
-        e.returnValue = 'Stay on Page?'
+    if (global.window) {
+      const unwatch = this.$watch('edited', (newVal) => {
+        if (newVal) {
+          window.addEventListener('beforeunload', function (e) {
+            e.preventDefault()
+            e.returnValue = 'Stay on Page?'
+          })
+          unwatch()
+        }
       })
+    }
+    if (global.document) {
+      const pg = document.querySelector('.playground-editor')
+      if (pg) {
+        pg.addEventListener('keyup', (e) => {
+          if (e.ctrlKey && e.keyCode === 13) {
+            this.onRun()
+          }
+        })
+      }
     }
     let counter = 0
     const f = () => {
@@ -252,32 +255,17 @@ export default {
         this.result = { error: err.toString() }
       } finally {
         this.loading = false
-        this.tryScroll()
       }
     },
     resultCallback (msg) {
       this.loading = false
       this.result = msg
-      this.$nextTick(() => {
-        this.tryScroll()
-      })
     },
     valueToJSON (value) {
       try {
         return JSON.stringify(JSON.parse(value), null, 2)
       } catch (err) {
         return `JSON Error: ${err.toString()}`
-      }
-    },
-    tryScroll () {
-      if (!this.checkWASM) {
-        return
-      }
-      const resultDiv = document.querySelector('.result')
-      if (resultDiv) {
-        if (resultDiv.offsetTop > document.querySelector('.body-container').offsetTop + 50) {
-          resultDiv.scrollIntoView(true)
-        }
       }
     }
   }
@@ -288,32 +276,37 @@ export default {
   font-size: small;
 }
 
-.box {
-  width: 98%;
-  margin-left: 1%;
-  margin-right: 1%;
+.playground {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
 }
 
 .head {
+  width: 100%;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  flex-basis: 98%;
-  align-items: stretch;
 }
 
 .playground-text {
+  padding-right: 5px;
   overflow: visible;
   font-size: 16pt;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
 }
 
 .head-buttons {
   height: 28px;
-  padding-left: 5px;
-  flex: 1 0 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-wrap: nowrap;
+  align-items: stretch;
+}
+
+.head-gh {
+  padding-right: 5px;
 }
 
 .key-press {
@@ -328,23 +321,23 @@ export default {
 .loader-wrapper {
   width: 20px;
   flex: 0 0 20px;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .copyright {
+  flex: 0 0 auto;
   color: #ccc;
-  font-size: 12px;
+  font-size: 10pt;
   text-align: right;
 }
 
 .body-container {
+  flex: 0 0 auto;
   width: 100%;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-}
-
-.head > div {
-  padding: 5px;
 }
 
 // required class for editor
@@ -352,10 +345,13 @@ export default {
   background: #2d2d2d;
   color: #ccc;
   font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
-  font-size: 12pt;
+  font-size: 11pt;
   line-height: 1.2;
   padding: 0px;
-  max-height: 100vh;
+  max-width: 49%;
+  margin-right: 1%;
+  flex: 1 1 auto;
+  height: 85vh;
 }
 
 // optional
@@ -364,8 +360,14 @@ export default {
 }
 
 .result {
-  font-size: 14px;
+  font-size: 11pt;
   background: #2d2d2d;
+  max-width: 48%;
+  margin-left: 1%;
+  padding-left: 1%;
+  height: 85vh;
+  flex: 1 1 auto;
+  overflow: auto;
 }
 
 .result-error {
@@ -375,51 +377,33 @@ export default {
 }
 
 .head,
-.result {
+.result,
+.footer {
   color: white;
-  padding: 5px;
-}
-
-.result-value {
-  padding-bottom: 25px;
-}
-
-pre {
-  white-space: pre-wrap; /* Since CSS 2.1 */
-  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-  white-space: -pre-wrap; /* Opera 4-6 */
-  white-space: -o-pre-wrap; /* Opera 7 */
-  word-wrap: break-word; /* Internet Explorer 5.5+ */
 }
 
 .footer {
-  position: fixed;
   bottom: 0;
   width: 100%;
   text-align: right;
 }
 
+.metrics {
+  font-size: 10pt;
+}
+
 @media (max-width: 600px) {
-  .hidden-mob {
+  .hidden-sm {
     display: none;
   }
   .playground-text {
-    justify-content: center;
-    text-align: center;
-  }
-  .head-buttons {
-    justify-content: left;
+    font-size: 14pt;
   }
 }
 
-@media (min-width: 992px) {
-  .playground-editor {
-    width: 48%;
-    max-height: unset;
-  }
-  .result {
-    width: 48%;
-    margin-left: 0;
+@media (min-width: 900px) {
+  .copyright {
+    flex: 1 0 auto;
   }
 }
 </style>
