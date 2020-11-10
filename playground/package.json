@@ -72,7 +72,8 @@
           "jest": true
         }
       }
-    ]
+    ],
+    "ignorePatterns": ["wasm_exec.js", "wasm_exec.*.js"]
   },
   "browserslist": [
     "> 1%",
