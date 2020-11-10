@@ -12,6 +12,7 @@
           @click="onRun"
         >
           Run
+          <span class="key-press">Ctrl+↵</span>
         </button>
         <button
           id="about-button"
@@ -47,6 +48,7 @@
         :highlight="highlighter"
         line-numbers
         class="box playground-editor"
+        @keyup.ctrl.enter="onRun"
       />
       <div class="box result">
         <div
@@ -312,6 +314,11 @@ export default {
   flex: 1 0 auto;
   display: flex;
   flex-wrap: nowrap;
+}
+
+.key-press {
+  opacity: 0.4;
+  font-size: 90%;
 }
 
 .head-buttons .button {
