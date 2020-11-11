@@ -118,7 +118,12 @@
             <br><br>
             Playground Version: {{ playgroundVersion }}<br>
             uGO Version: {{ uGOVersion }}<br>
-            Build Time: {{ buildTime }}
+            Build Time: {{ buildTime }}<br><br>
+            <a
+              href="https://github.com/ozanh/ugo"
+              target="_blank"
+            >uGO Script Language</a><br>
+            Copyright © 2020 Ozan Hacıbekiroğlu
           </p>
         </template>
 
