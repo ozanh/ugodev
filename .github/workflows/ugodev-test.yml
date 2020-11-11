@@ -28,6 +28,13 @@ jobs:
     - name: Get Go dependencies
       run: |
         go get -v -t -d ./...
+        go get -u golang.org/x/lint/golint
+        go get -u honnef.co/go/tools/cmd/staticcheck
+    
+    - name: Lint Go
+      run: |
+        golint -set_exit_status ./...
+	      staticcheck ./...
     
     - name: Build ugodoc
       working-directory: ./cmd/ugodoc
@@ -38,6 +45,7 @@ jobs:
       working-directory: ./playground
       run: |
         npm install
+        npm run lint
         npm run build
         npm run test
       env:
