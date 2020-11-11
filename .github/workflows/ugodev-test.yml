@@ -1,0 +1,44 @@
+name: ugodev-test
+
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main, development ]
+
+jobs:
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+
+    - name: Set up Go 1.15
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.15
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get Go dependencies
+      run: |
+        go get -v -t -d ./...
+    
+    - name: Build ugodoc
+      working-directory: ./cmd/ugodoc
+      run: |
+        go build .
+
+    - name: Build and Test Playground
+      working-directory: ./playground
+      run: |
+        npm install
+        npm run test
+        npm run build
+      env:
+        CI: true
