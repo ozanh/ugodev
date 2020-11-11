@@ -191,5 +191,5 @@ func main() {
 	defer w.Release()
 	js.Global().Set("runUGO", w)
 	<-make(chan bool)
-	fmt.Println("wasm stopped")
+	fmt.Println("uGo Playground Stopped")
 }

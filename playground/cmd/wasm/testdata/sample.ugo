@@ -14,7 +14,7 @@ var fn = func(v) {
 }
 
 var g = false               // bool
-h := error("error value")   // error
+h := error("error message") // error
 
 println("a:", a, "b:", b, "c:", c, "d:", d, 
   "e:", e, "f:", fn, "g:", "h:", h)
@@ -121,5 +121,92 @@ println(arr)
 time := import("time")
 // add 1 hour to now and print with RFC3339Nano layout
 println(time.Format(time.Now() + time.Hour, time.RFC3339Nano))
+
+// Error Handling
+
+// 1. Return error as a value
+v := func(...args) {
+  return len(args) > 0 ? args[0] : error("error encountered")
+}()
+
+if isError(v) {
+  println(v)
+}
+
+// 2. try-catch-finally
+try {
+  func() {
+    throw "thrown error"
+  }()
+} catch err {
+  println("caught:", err.Message)
+} finally {
+  // this block is always executed
+  println("finally block")
+}
+
+// thrown errors hold stack traces
+v = func() {
+  throw "with stack trace"
+}
+
+try {
+  v()
+} catch err {
+  printf("%+v\n", err)
+}
+
+// some examples
+v = 0
+for i := 0; i < 100; i++ {
+  try {
+    continue
+  } finally {
+    v++
+    i++
+  }
+}
+println(v)  // 50
+
+/*******************************/
+v = 0
+for i := 0; i < 100; i++ {
+  try {
+    break
+  } finally {
+    v++
+  }
+}
+println(v)  // 1
+
+/*******************************/
+v = 0
+for i := 0; i < 100; i++ {
+  try {
+    i  / v  // zero divison error
+  } catch err {
+    printf("%+v\n", err)
+    break
+  } finally {
+    v++
+  }
+}
+println(v)  // 1
+
+/*******************************/
+try {
+  v := func() {
+    try {
+      err := error("message")
+      throw err
+    } finally {
+      return "ignore thrown error"
+    }
+  }()
+} catch err {
+  println(err)
+} finally {
+  println(v)
+}
 
 return "End"
