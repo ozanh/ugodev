@@ -41,6 +41,7 @@ var (
 	reFuncHeader   = regexp.MustCompile(`^\s*##\s+Functions`)
 	reFuncAnnot    = regexp.MustCompile(`^\s*(\w+)\(.*?\)\s+->\s+.*?$`)
 	reLevel2header = regexp.MustCompile(`^\s*##\s`)
+	reWordStart    = regexp.MustCompile(`^\s*\w+`)
 )
 
 type docgroup struct {
@@ -118,11 +119,7 @@ func (dg *docgroup) processBlocks(lines []string) {
 			case typeBlock:
 				dg.types = append(dg.types, line)
 			case constBlock:
-				matched, err := regexp.MatchString(`^\s*\w+`, line)
-				if err != nil {
-					dg.addError(err.Error())
-					continue
-				}
+				matched := reWordStart.MatchString(line)
 				if !matched {
 					dg.consts = append(dg.consts, line)
 					continue
