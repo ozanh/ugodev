@@ -1,6 +1,6 @@
 {
   "name": "ugo-playground",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "uGO Playground",
   "author": {
@@ -41,11 +41,11 @@
     "eslint-plugin-vue": "^7.0.0-0",
     "identity-obj-proxy": "^3.0.0",
     "jest-raw-loader": "^1.0.1",
-    "license-checker-webpack-plugin": "^0.1.5",
+    "license-checker-webpack-plugin": "^0.1.6",
     "raw-loader": "^4.0.2",
     "regenerator-runtime": "^0.13.7",
     "sass": "^1.29.0",
-    "sass-loader": "^10.0.5",
+    "sass-loader": "^10.1.0",
     "typescript": "~3.9.3",
     "vue-jest": "^5.0.0-0"
   },
@@ -73,7 +73,10 @@
         }
       }
     ],
-    "ignorePatterns": ["wasm_exec.js", "wasm_exec.*.js"]
+    "ignorePatterns": [
+      "wasm_exec.js",
+      "wasm_exec.*.js"
+    ]
   },
   "browserslist": [
     "> 1%",
