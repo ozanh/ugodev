@@ -364,6 +364,30 @@ export default {
   outline: none;
 }
 
+/***************************************************/
+// FIXME
+// this is a work around for issue:
+// https://github.com/koca/vue-prism-editor/issues/87
+//
+// Editor shows line numbers incorrectly due to wrapped content.
+// If it is forced to disable wrapping behavior then horizontall scroll
+// does not show up because of cascaded overflow:hidden style. After setting
+// overflow-x to scroll then editing becomes buggy because text does not
+// appear at the cursor. Finally setting width to a big number fixes
+// this issue temporarily.
+.prism-editor__textarea {
+  width: 999999px !important;
+}
+
+.prism-editor__editor {
+  white-space: pre !important;
+}
+
+.prism-editor__container {
+  overflow-x: scroll !important;
+}
+/***************************************************/
+
 .result {
   font-size: 11pt;
   background: #2d2d2d;
