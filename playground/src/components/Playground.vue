@@ -50,6 +50,7 @@
           line-numbers
           class="playground-editor"
           @input="edited = true"
+          @click="onEditorClick"
         />
         <div class="result">
           <div
@@ -271,6 +272,13 @@ export default {
         return JSON.stringify(JSON.parse(value), null, 2)
       } catch (err) {
         return `JSON Error: ${err.toString()}`
+      }
+    },
+    onEditorClick () {
+      const elem = document.querySelector('.prism-editor__textarea')
+      if (elem) {
+        elem.focus()
+        elem.click()
       }
     }
   }
