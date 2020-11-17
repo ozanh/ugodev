@@ -11,8 +11,8 @@ github.com/mattn/go-runewidth v0.0.6/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m
 github.com/mattn/go-runewidth v0.0.9 h1:Lm995f3rfxdpd6TSmuVCHVb/QhupuXlYr8sCI/QdE+0=
 github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/mattn/go-tty v0.0.3/go.mod h1:ihxohKRERHTVzN+aSVRwACLCeqIoZAWpoICkkvrWyR0=
-github.com/ozanh/ugo v0.0.0-20201113163932-7d21b6e27068 h1:Elixx/HZJQkpNNnZYVruK2vrBciCpkOQaeBSp28n9dc=
-github.com/ozanh/ugo v0.0.0-20201113163932-7d21b6e27068/go.mod h1:gW/3tpgQx7TK/AYsIm5x7GvxNjYHFb83dePL/hXAHLI=
+github.com/ozanh/ugo v0.0.0-20201117105718-5a4644567813 h1:WZrjHC7BRmS6MY3uWQ7UIaP90z5KH+Iuo0yfcBmWkHw=
+github.com/ozanh/ugo v0.0.0-20201117105718-5a4644567813/go.mod h1:gW/3tpgQx7TK/AYsIm5x7GvxNjYHFb83dePL/hXAHLI=
 github.com/pkg/term v1.1.0 h1:xIAAdCMh3QIAy+5FrE8Ad8XoDhEU4ufwbaSozViP9kk=
 github.com/pkg/term v1.1.0/go.mod h1:E25nymQcrSllhX42Ok8MRm1+hyBdHY0dCeiKZ9jpNGw=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
