@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/ozanh/ugo"
+	ugostrings "github.com/ozanh/ugo/stdlib/strings"
 	ugotime "github.com/ozanh/ugo/stdlib/time"
 )
 
@@ -91,6 +92,7 @@ func wrapper() js.Func {
 			script := args[1].String()
 			mm := ugo.NewModuleMap()
 			mm.AddBuiltinModule("time", ugotime.Module)
+			mm.AddBuiltinModule("strings", ugostrings.Module)
 			opts := ugo.DefaultCompilerOptions
 			opts.ModuleMap = mm
 			f := mt.initCompile()
@@ -143,20 +145,6 @@ func ugoToJSON(v ugo.Object) ([]byte, error) {
 
 func conv(v ugo.Object) interface{} {
 	switch vv := v.(type) {
-	case ugo.Int:
-		return vv
-	case ugo.Uint:
-		return vv
-	case ugo.Char:
-		return vv
-	case ugo.Float:
-		return vv
-	case ugo.Bool:
-		return vv
-	case ugo.String:
-		return vv
-	case ugo.Bytes:
-		return vv
 	case ugo.Array:
 		arr := make([]interface{}, len(vv))
 		for i, mv := range vv {

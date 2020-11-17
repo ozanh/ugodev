@@ -16,7 +16,7 @@ var fn = func(v) {
 var g = false               // bool
 h := error("error message") // error
 
-println("a:", a, "b:", b, "c:", c, "d:", d, 
+println("a:", a, "b:", b, "c:", c, "d:", d,
   "e:", e, "f:", fn, "g:", "h:", h)
 
 println(fn("uGO "))
@@ -88,7 +88,7 @@ v7 := v2 > v3 ? v2 << 1 : v2 >> 1
 println(v7)
 
 // create a map
-m := {a: 1, b: 2.0, c: string(v7), 
+m := {a: 1, b: 2.0, c: string(v7),
       fn: func(x) { return x+1 }
     }
 
@@ -119,8 +119,20 @@ println(arr)
 
 // import stdlib time module
 time := import("time")
+// import stdlib strings module
+strings := import("strings")
+
 // add 1 hour to now and print with RFC3339Nano layout
 println(time.Format(time.Now() + time.Hour, time.RFC3339Nano))
+
+// string padding
+s := strings.PadLeft(string(int("1_984")), 8, "=>")
+s = strings.PadRight(s, 12, "<=")
+println(s,
+        sprintf("\n  has %d '=>' and %d '<='",
+        strings.Count(s, "=>"),
+        strings.Count(s, "<="))
+)
 
 // Error Handling
 
