@@ -29,7 +29,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ozanh/ugo/stdlib/time"
+	"github.com/ozanh/ugo"
+
+	ugostrings "github.com/ozanh/ugo/stdlib/strings"
+	ugotime "github.com/ozanh/ugo/stdlib/time"
 )
 
 const ugoDocPrefix = "ugo:doc"
@@ -45,12 +48,13 @@ var (
 )
 
 type docgroup struct {
-	module string
-	docs   []string
-	types  []string
-	consts []string
-	funcs  []string
-	errs   []string
+	module    string
+	docs      []string
+	types     []string
+	consts    []string
+	funcs     []string
+	errs      []string
+	funcHLine bool
 }
 
 func (dg *docgroup) addError(msg string) {
@@ -89,7 +93,6 @@ func (dg *docgroup) processBlocks(lines []string) {
 		constBlock
 		funcBlock
 	)
-	var addHLine bool
 	block := unknown
 	for i := 0; i < len(lines); i++ {
 		switch block {
@@ -117,58 +120,77 @@ func (dg *docgroup) processBlocks(lines []string) {
 			}
 			switch block {
 			case typeBlock:
-				dg.types = append(dg.types, line)
+				dg.processTypeBlock(line)
 			case constBlock:
-				matched := reWordStart.MatchString(line)
-				if !matched {
-					dg.consts = append(dg.consts, line)
-					continue
-				}
-				line = fmt.Sprintf("- `%s`: %s",
-					strings.TrimSpace(line), getModuleItem(dg.module, line))
-				dg.consts = append(dg.consts, line)
+				dg.processConstBlock(line)
 			case funcBlock:
-				if !reFuncAnnot.MatchString(line) {
-					dg.funcs = append(dg.funcs, line)
-					continue
-				}
-				line = strings.TrimSpace(line)
-				parts := reFuncAnnot.FindStringSubmatch(line)
-				line = fmt.Sprintf("`%s`\n", line)
-				if addHLine {
-					dg.funcs = append(dg.funcs, "---\n")
-				} else {
-					addHLine = true
-				}
-				if len(parts) < 2 {
-					dg.addError(fmt.Sprintf("invalid function name at %s",
-						line))
-				} else {
-					if getModuleItem(dg.module, parts[len(parts)-1]) == "" {
-						msg := fmt.Sprintf("function not exist in module:%s",
-							line)
-						dg.addError(msg)
-					}
-				}
-				dg.funcs = append(dg.funcs, line)
+				dg.processFuncBlock(line)
 			}
 		}
 	}
 }
 
+func (dg *docgroup) processTypeBlock(line string) {
+	dg.types = append(dg.types, line)
+}
+
+func (dg *docgroup) processConstBlock(line string) {
+	matched := reWordStart.MatchString(line)
+	if !matched {
+		dg.consts = append(dg.consts, line)
+		return
+	}
+	line = fmt.Sprintf("- `%s`: %s",
+		strings.TrimSpace(line), getModuleItem(dg.module, line))
+	dg.consts = append(dg.consts, line)
+}
+
+func (dg *docgroup) processFuncBlock(line string) {
+	if !reFuncAnnot.MatchString(line) {
+		dg.funcs = append(dg.funcs, line)
+		return
+	}
+	line = strings.TrimSpace(line)
+	parts := reFuncAnnot.FindStringSubmatch(line)
+	line = fmt.Sprintf("`%s`\n", line)
+	if dg.funcHLine {
+		dg.funcs = append(dg.funcs, "---\n")
+	} else {
+		dg.funcHLine = true
+	}
+	if len(parts) < 2 {
+		dg.addError(fmt.Sprintf("invalid function name at %s",
+			line))
+	} else {
+		if getModuleItem(dg.module, parts[len(parts)-1]) == "" {
+			msg := fmt.Sprintf("function not exist in module:%s",
+				line)
+			dg.addError(msg)
+		}
+	}
+	dg.funcs = append(dg.funcs, line)
+}
+
 func getModuleItem(module, key string) string {
+	var moduleMap map[string]ugo.Object
 	switch module {
 	case "time":
-		v := time.Module[key]
-		t := v.TypeName()
-		format := "%s(%q)"
-		if t != "string" {
-			format = "%s(%s)"
-		}
-		return fmt.Sprintf(format, v.TypeName(), v.String())
+		moduleMap = ugotime.Module
+		goto found
+	case "strings":
+		moduleMap = ugostrings.Module
+		goto found
 	default:
 		panic(fmt.Errorf("unknown module:%s", module))
 	}
+found:
+	v := moduleMap[key]
+	t := v.TypeName()
+	format := "%s(%q)"
+	if t != "string" {
+		format = "%s(%s)"
+	}
+	return fmt.Sprintf(format, v.TypeName(), v.String())
 }
 
 func formatComments(comments []string) ([]string, error) {
@@ -189,9 +211,15 @@ func formatComments(comments []string) ([]string, error) {
 
 	p := make([]string, 0, len(d.docs)+len(d.consts)+len(d.funcs))
 	p = append(p, d.docs...)
-	p = append(p, d.types...)
-	p = append(p, d.consts...)
-	p = append(p, d.funcs...)
+	if len(d.types) > 1 {
+		p = append(p, d.types...)
+	}
+	if len(d.consts) > 1 {
+		p = append(p, d.consts...)
+	}
+	if len(d.funcs) > 1 {
+		p = append(p, d.funcs...)
+	}
 	return p, nil
 }
 
