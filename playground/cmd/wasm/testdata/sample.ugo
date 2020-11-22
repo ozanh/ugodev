@@ -10,7 +10,11 @@ e := 3.14   // float
 
 // compiled-function
 var fn = func(v) {
-  return v + "Playground"
+  strings := import("strings")
+  if strings.ToLower(v) != "ugo" {
+    return "", error("wrong argument")
+  }
+  return strings.Join([v, "Playground"], " ")
 }
 
 var g = false               // bool
@@ -19,7 +23,11 @@ h := error("error message") // error
 println("a:", a, "b:", b, "c:", c, "d:", d,
   "e:", e, "f:", fn, "g:", "h:", h)
 
-println(fn("uGO "))
+u, err := fn("uGO")
+if err != undefined {
+  throw err
+}
+println(u)
 
 // arrays
 
@@ -53,6 +61,18 @@ sum := func(...nums) {
 nums := [1, 2, 3, 4, 5, 6]
 println(sum(...nums))  // expand array
 println(len(nums))     // length of array
+
+// destructuring array
+n1, n2 := nums
+println(n1, n2)  // n1 == nums[0], n2 == nums[1]
+
+// destructuring array
+nums, err = func(nums) {
+  if len(nums) != 10 {
+    return undefined, error("array length must be 10")
+  }
+}(nums)
+println(nums, err)  // nums == undefined, err = error("array length must be 10")
  
 var count_evens
 count_evens = func(n, c) {
