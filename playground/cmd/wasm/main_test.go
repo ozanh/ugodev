@@ -137,9 +137,11 @@ func TestUGOCheck(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("callback result timeout")
 	}
-
-	// parser error
-	v = global.Get("checkUGO").Invoke(global.Get("obj"), "var a,\ntry {}")
+}
+func TestUGOCheckParserError(t *testing.T) {
+	global := js.Global()
+	cbArgs := setupCheck(t)
+	v := global.Get("checkUGO").Invoke(global.Get("obj"), "var a,\ntry {}")
 	if v.Type() != js.TypeNull {
 		t.Fatalf("checkUGO() expected: %v, got: %v", js.Null(), v)
 	}
@@ -182,9 +184,11 @@ func TestUGOCheck(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("callback result timeout")
 	}
-
-	// compiler error
-	v = global.Get("checkUGO").Invoke(global.Get("obj"), "x=123")
+}
+func TestUGOCheckCompilerError(t *testing.T) {
+	global := js.Global()
+	cbArgs := setupCheck(t)
+	v := global.Get("checkUGO").Invoke(global.Get("obj"), "x=123")
 	if v.Type() != js.TypeNull {
 		t.Fatalf("checkUGO() expected: %v, got: %v", js.Null(), v)
 	}
@@ -216,8 +220,11 @@ func TestUGOCheck(t *testing.T) {
 		t.Fatal("callback result timeout")
 	}
 
-	// optimizer error
-	v = global.Get("checkUGO").Invoke(global.Get("obj"), "1/0\n1/0")
+}
+func TestUGOCheckOptimizerError(t *testing.T) {
+	global := js.Global()
+	cbArgs := setupCheck(t)
+	v := global.Get("checkUGO").Invoke(global.Get("obj"), "1/0\n1/0")
 	if v.Type() != js.TypeNull {
 		t.Fatalf("checkUGO() expected: %v, got: %v", js.Null(), v)
 	}
