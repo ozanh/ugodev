@@ -6,16 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- <link rel="icon" href="<%= BASE_URL %>favicon.ico" /> -->
     <title><%= htmlWebpackPlugin.options.title %></title>
-    <script src="/static/<%= VUE_APP_WASM_EXEC_FILE %>"></script>
-    <script>
-      const go = new Go();
-      WebAssembly.instantiateStreaming(
-        fetch("/static/<%= VUE_APP_WASM_FILE %>"),
-        go.importObject
-      ).then((result) => {
-        go.run(result.instance);
-      });
-    </script>
   </head>
   <body>
     <noscript>

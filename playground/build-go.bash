@@ -40,15 +40,9 @@ UGO_VERSION="$(go list -m -f {{.Version}} github.com/ozanh/ugo)"
 # create ugo.wasm file in current working dir
 GOOS=js GOARCH=wasm go build -o ./ugo.wasm \
     github.com/ozanh/ugodev/playground/cmd/wasm
-    
 
-WASM_FILE="ugo.wasm"
-if [ "$MODE" = "production" ]; then
-    WASM_FILE="ugo.$(md5sum ugo.wasm | cut -c1-8).wasm"
-    mv ./ugo.wasm "$WASM_FILE"
-fi
 cat >> "$ENV_FILE" << EOF
-VUE_APP_WASM_FILE=$WASM_FILE
+VUE_APP_WASM_FILE=ugo.wasm
 VUE_APP_UGO_VERSION=$UGO_VERSION
 VUE_APP_BUILD_TIME=$BUILD_TIME
 VUE_APP_LICENSE=../LICENSE

@@ -1,5 +1,6 @@
 const CopyPlugin = require('copy-webpack-plugin')
 const LicenseCheckerWebpackPlugin = require('license-checker-webpack-plugin')
+const AddAssetHtmlWebpackPlugin = require('add-asset-html-webpack-plugin')
 const { resolve } = require('path')
 
 process.env.VUE_APP_PLAYGROUND_VERSION = require('./package.json').version
@@ -23,26 +24,19 @@ if (process.env.VUE_APP_GO_LICENSE &&
     ]) {
       const s = fs.readFileSync(file, { encoding: 'utf8' })
       const target = resolve(outputDir, process.env.VUE_APP_THIRD_PARTY_PATH)
-      fs.appendFileSync(target, `\n${'-'.repeat(80)}\n\n`, 'utf8')
-      fs.appendFileSync(target, s, 'utf8')
+      try {
+        fs.appendFileSync(target, `\n${'-'.repeat(80)}\n\n`, 'utf8')
+        fs.appendFileSync(target, s, 'utf8')
+      } catch (err) {
+        console.warn(err)
+      }
     }
   })
 }
 
 let copyFiles = []
-if (process.env.VUE_APP_WASM_EXEC_FILE &&
-  process.env.VUE_APP_WASM_EXEC_FILE &&
-  process.env.VUE_APP_LICENSE &&
-  process.env.VUE_APP_LICENSE_PATH) {
+if (process.env.VUE_APP_LICENSE && process.env.VUE_APP_LICENSE_PATH) {
   copyFiles = [
-    {
-      from: resolve(__dirname, process.env.VUE_APP_WASM_EXEC_FILE),
-      to: 'static/'
-    },
-    {
-      from: resolve(__dirname, process.env.VUE_APP_WASM_FILE),
-      to: 'static/'
-    },
     {
       from: resolve(__dirname, process.env.VUE_APP_LICENSE),
       to: process.env.VUE_APP_LICENSE_PATH
@@ -54,11 +48,22 @@ module.exports = {
   productionSourceMap: false,
   outputDir: outputDir,
   assetsDir: 'static',
+  css: {
+    extract: false
+  },
   configureWebpack: {
+    optimization: {
+      splitChunks: false
+    },
     plugins: [
       new CopyPlugin(copyFiles),
+      new AddAssetHtmlWebpackPlugin({
+        filepath: resolve(__dirname, process.env.VUE_APP_WASM_EXEC_FILE),
+        publicPath: '/static/js',
+        outputPath: 'static/js'
+      }),
       new LicenseCheckerWebpackPlugin({
-        allow: '(Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause OR MIT)',
+        allow: '(Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause OR MIT OR ISC)',
         outputFilename: process.env.VUE_APP_THIRD_PARTY_PATH,
         emitError: true
       })
@@ -70,6 +75,19 @@ module.exports = {
       .test(/\.ugo$/)
       .use('raw-loader')
       .loader('raw-loader')
+      .end()
+    config.module
+      .rule('wasm')
+      .test(/\.wasm$/)
+      .type('javascript/auto')
+      .use('file-loader')
+      .loader('file-loader')
+      .tap(options => {
+        options = options || {}
+        options.name = '[name].[hash:8].[ext]'
+        options.outputPath = 'static'
+        return options
+      })
       .end()
   }
 }

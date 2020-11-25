@@ -144,6 +144,9 @@
         <template #header>
           <h1>WebAssembly Error</h1>
         </template>
+        <template #body>
+          <br>
+        </template>
         <template #footer>
           <button
             class="button"
@@ -270,10 +273,10 @@ export default {
         return
       }
       counter++
-      setTimeout(f, 1000)
+      setTimeout(f, 250)
     }
     if (this.checkWASM) {
-      setTimeout(f, 1000)
+      setTimeout(f, 250)
     }
   },
   methods: {
