@@ -67,7 +67,13 @@ func newResult(
 	}
 }
 
-func wrapper() js.Func {
+func runWrapper() js.Func {
+	mm := ugo.NewModuleMap()
+	mm.AddBuiltinModule("time", ugotime.Module)
+	mm.AddBuiltinModule("strings", ugostrings.Module)
+	opts := ugo.DefaultCompilerOptions
+	opts.ModuleMap = mm
+
 	return js.FuncOf(func(this js.Value, args []js.Value) (value interface{}) {
 		mt := metrics{}
 		mt.init()
@@ -84,17 +90,12 @@ func wrapper() js.Func {
 			stdout.Reset()
 			defer func() {
 				if r := recover(); r != nil {
-					callback(newResult(fmt.Sprintf("panic: %v", r), "", mt.output()))
+					callback(newResult(fmt.Sprintf("panic: %+v", r), "", mt.output()))
 				}
 				stdout.Reset()
 			}()
 
 			script := args[1].String()
-			mm := ugo.NewModuleMap()
-			mm.AddBuiltinModule("time", ugotime.Module)
-			mm.AddBuiltinModule("strings", ugostrings.Module)
-			opts := ugo.DefaultCompilerOptions
-			opts.ModuleMap = mm
 			f := mt.initCompile()
 			bc, err := ugo.Compile([]byte(script), opts)
 			f()
@@ -177,9 +178,13 @@ func conv(v ugo.Object) interface{} {
 
 func main() {
 	fmt.Println("uGo Playground for WebAssembly")
-	w := wrapper()
-	defer w.Release()
-	js.Global().Set("runUGO", w)
+	rw := runWrapper()
+	defer rw.Release()
+	cw := checkWrapper()
+	defer cw.Release()
+	global := js.Global()
+	global.Set("runUGO", rw)
+	global.Set("checkUGO", cw)
 	<-make(chan bool)
 	fmt.Println("uGo Playground Stopped")
 }

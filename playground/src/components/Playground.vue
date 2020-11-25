@@ -175,6 +175,10 @@ import 'prismjs/components/prism-clike'
 import 'prismjs/components/prism-ugo'
 import 'prismjs/themes/prism-okaidia.css' // import syntax highlighting styles
 
+import { debounce } from '../lib/utils'
+// FIXME: During testing, due to jest or babel syntax error is thrown
+// for mini-toastr. It is imported with require in methods.
+// import miniToastr from 'mini-toastr'
 import code from '../../cmd/wasm/testdata/sample.ugo'
 
 export default {
@@ -202,10 +206,16 @@ export default {
     showAboutModal: false,
     showWASMErrorModal: false,
     code: code,
+    linesMsgs: {},
     loading: true,
     result: null,
     edited: false
   }),
+  watch: {
+    code () {
+      !this.loading && this.checkCode()
+    }
+  },
   mounted () {
     if (global.window) {
       const unwatch = this.$watch('edited', (newVal) => {
@@ -217,14 +227,27 @@ export default {
           unwatch()
         }
       })
+      const ln = document.querySelector('.prism-editor__line-numbers')
+      if (ln) {
+        ln.addEventListener('click', (e) => {
+          if (!e.target.classList.contains('line-number-red')) return
+          const msgs = this.linesMsgs[e.target.innerText] || []
+          if (!Array.isArray(msgs)) return
+          require('mini-toastr').default.error(
+            `<pre style="white-space: pre-wrap">${msgs.join('\n\n').trim()}</pre>`,
+            'Warning',
+            5000,
+            undefined,
+            { allowHtml: true }
+          )
+        })
+      }
     }
     if (global.document) {
       const pg = document.querySelector('.playground-editor')
       if (pg) {
         pg.addEventListener('keyup', (e) => {
-          if (e.ctrlKey && e.keyCode === 13) {
-            this.onRun()
-          }
+          if (e.ctrlKey && e.keyCode === 13) this.onRun()
         })
       }
     }
@@ -238,6 +261,12 @@ export default {
         }
       } else {
         this.loading = false
+
+        this.checkCode = debounce(() => {
+          if (global.checkUGO == null) return
+          global.checkUGO(this, this.code.toString())
+        }, 1000)
+
         return
       }
       counter++
@@ -280,11 +309,37 @@ export default {
         elem.focus()
         elem.click()
       }
+    },
+    checkCallback (result) {
+      if (typeof result !== 'undefined') {
+        if (result.warning) {
+          console.log('check warning:', result.warning)
+        }
+        this.highlightLine(result.lines || {})
+        return
+      }
+      this.highlightLine({})
+    },
+    highlightLine (linesMsgs) {
+      this.linesMsgs = linesMsgs
+      const lines = document.querySelectorAll('.prism-editor__line-number')
+      if (!lines) return
+      lines.forEach((el) => {
+        if (el.innerText in linesMsgs) el.classList.add('line-number-red')
+        else el.classList.remove('line-number-red')
+      })
     }
   }
 }
 </script>
 <style lang="scss">
+.line-number-red {
+  background-color: red;
+  opacity: 0.8;
+  color: white !important;
+  cursor: pointer;
+}
+
 .modal__dialog {
   font-size: small;
 }

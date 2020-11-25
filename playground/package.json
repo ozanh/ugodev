@@ -1,6 +1,6 @@
 {
   "name": "ugo-playground",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "description": "uGO Playground",
   "author": {
@@ -16,12 +16,13 @@
   "main": "index.js",
   "dependencies": {
     "core-js": "^3.7.0",
+    "mini-toastr": "^0.8.1",
     "prismjs": "git+https://github.com/ozanh/prism.git",
     "vue": "^3.0.0",
     "vue-prism-editor": "^2.0.0-alpha.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.7",
+    "@babel/core": "^7.12.9",
     "@babel/preset-env": "^7.12.7",
     "@vue/cli-plugin-babel": "^4.5.9",
     "@vue/cli-plugin-eslint": "^4.5.9",
@@ -112,13 +113,11 @@
   },
   "babel": {
     "presets": [
-      "@babel/preset-env"
+      "@vue/cli-plugin-babel/preset"
     ]
   },
-  "_id": "playground@0.1.0",
   "keywords": [
     "uGO"
   ],
-  "license": "MIT",
-  "readme": "uGO Playground"
+  "license": "MIT"
 }
