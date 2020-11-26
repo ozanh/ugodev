@@ -7,11 +7,11 @@
     "name": "Ozan Hacıbekiroğlu"
   },
   "scripts": {
-    "serve": "./build-go.bash development && vue-cli-service serve",
-    "build": "./build-go.bash production && vue-cli-service build",
-    "lint": "./build-go.bash development && vue-cli-service lint --fix",
-    "test:unit": "./build-go.bash test && vue-cli-service test:unit",
-    "test": "./build-go.bash test && vue-cli-service test:unit"
+    "serve": "make development && vue-cli-service serve",
+    "build": "make production && vue-cli-service build",
+    "lint": "make development && vue-cli-service lint --fix",
+    "test:unit": "make test && vue-cli-service test:unit",
+    "test": "make test && vue-cli-service test:unit"
   },
   "main": "index.js",
   "dependencies": {
