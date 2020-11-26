@@ -1,6 +1,5 @@
 const CopyPlugin = require('copy-webpack-plugin')
 const LicenseCheckerWebpackPlugin = require('license-checker-webpack-plugin')
-const AddAssetHtmlWebpackPlugin = require('add-asset-html-webpack-plugin')
 const { resolve } = require('path')
 
 process.env.VUE_APP_PLAYGROUND_VERSION = require('./package.json').version
@@ -35,11 +34,16 @@ if (process.env.VUE_APP_GO_LICENSE &&
 }
 
 let copyFiles = []
-if (process.env.VUE_APP_LICENSE && process.env.VUE_APP_LICENSE_PATH) {
+if (process.env.VUE_APP_LICENSE && process.env.VUE_APP_LICENSE_PATH &&
+  process.env.VUE_APP_WASM_EXEC_FILE) {
   copyFiles = [
     {
       from: resolve(__dirname, process.env.VUE_APP_LICENSE),
       to: process.env.VUE_APP_LICENSE_PATH
+    },
+    {
+      from: resolve(__dirname, process.env.VUE_APP_WASM_EXEC_FILE),
+      to: 'static/js'
     }
   ]
 }
@@ -57,11 +61,6 @@ module.exports = {
     },
     plugins: [
       new CopyPlugin(copyFiles),
-      new AddAssetHtmlWebpackPlugin({
-        filepath: resolve(__dirname, process.env.VUE_APP_WASM_EXEC_FILE),
-        publicPath: '/static/js',
-        outputPath: 'static/js'
-      }),
       new LicenseCheckerWebpackPlugin({
         allow: '(Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause OR MIT OR ISC)',
         outputFilename: process.env.VUE_APP_THIRD_PARTY_PATH,
@@ -71,10 +70,31 @@ module.exports = {
   },
   chainWebpack: config => {
     config.module
-      .rule('raw')
+      .rule('ugo file')
       .test(/\.ugo$/)
       .use('raw-loader')
       .loader('raw-loader')
+      .end()
+    config.module
+      .rule('worker')
+      .test(/\.worker\.js$/)
+      .use('worker-loader')
+      .loader('worker-loader')
+      .tap(options => {
+        options = options || {}
+        options.inline = 'fallback'
+        options.filename = 'static/js/[name].js'
+        if (process.env.NODE_ENV !== 'production') {
+          // FIXME: Setting publicPath is required for worker-loader to work
+          // properly until a solution is found. Following Open PR may fix this
+          // bug: https://github.com/webpack-contrib/worker-loader/pull/291
+          // Browser throws invalid URL error.
+          options.publicPath = 'http://localhost:8080/'
+        } else {
+          options.publicPath = 'https://play.verigraf.com/'
+        }
+        return options
+      })
       .end()
     config.module
       .rule('wasm')

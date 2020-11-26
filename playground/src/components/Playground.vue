@@ -124,6 +124,10 @@
               href="https://github.com/ozanh/ugo"
               target="_blank"
             >uGO Script Language</a><br>
+            <a
+              href="https://github.com/ozanh/ugodev/tree/main/playground"
+              target="_blank"
+            >uGO Playground</a><br>
             Copyright © 2020 Ozan Hacıbekiroğlu
           </p>
         </template>
@@ -178,11 +182,12 @@ import 'prismjs/components/prism-clike'
 import 'prismjs/components/prism-ugo'
 import 'prismjs/themes/prism-okaidia.css' // import syntax highlighting styles
 
+import miniToastr from 'mini-toastr'
+import { wrap, proxy } from 'comlink'
+
 import { debounce } from '../lib/utils'
-// FIXME: During testing, due to jest or babel syntax error is thrown
-// for mini-toastr. It is imported with require in methods.
-// import miniToastr from 'mini-toastr'
 import code from '../../cmd/wasm/testdata/sample.ugo'
+import Worker from '../wasm.worker'
 
 export default {
   name: 'Playground',
@@ -216,11 +221,16 @@ export default {
   }),
   watch: {
     code () {
-      !this.loading && this.checkCode()
+      !this.loading && !!this.code && this.checkCode()
+    }
+  },
+  created () {
+    if (this.checkWASM) {
+      this.worker = wrap(new Worker())
     }
   },
   mounted () {
-    if (global.window) {
+    if (typeof global.window !== 'undefined') {
       const unwatch = this.$watch('edited', (newVal) => {
         if (newVal) {
           window.addEventListener('beforeunload', function (e) {
@@ -236,7 +246,7 @@ export default {
           if (!e.target.classList.contains('line-number-red')) return
           const msgs = this.linesMsgs[e.target.innerText] || []
           if (!Array.isArray(msgs)) return
-          require('mini-toastr').default.error(
+          miniToastr.error(
             `<pre style="white-space: pre-wrap">${msgs.join('\n\n').trim()}</pre>`,
             'Warning',
             5000,
@@ -246,7 +256,7 @@ export default {
         })
       }
     }
-    if (global.document) {
+    if (typeof global.document !== 'undefined') {
       const pg = document.querySelector('.playground-editor')
       if (pg) {
         pg.addEventListener('keyup', (e) => {
@@ -254,44 +264,41 @@ export default {
         })
       }
     }
+
+    if (!this.checkWASM) return
     let counter = 0
-    const f = () => {
-      if (global.runUGO == null) {
-        if (counter > 9) {
-          this.loading = false
-          this.showWASMErrorModal = true
-          return
-        }
-      } else {
+    const f = async () => {
+      const ok = await this.worker.isLoaded()
+      if (ok) {
         this.loading = false
-
         this.checkCode = debounce(() => {
-          if (global.checkUGO == null) return
-          global.checkUGO(this, this.code.toString())
+          this.worker.checkUGO(proxy(this), this.code.toString())
         }, 1000)
-
-        return
+      } else {
+        counter++
+        if (counter > 100) {
+          counter = 0
+          this.loading = false
+          if (!this.showWASMErrorModal) this.showWASMErrorModal = true
+        }
+        setTimeout(f, 250)
       }
-      counter++
-      setTimeout(f, 250)
     }
-    if (this.checkWASM) {
-      setTimeout(f, 250)
-    }
+    setTimeout(f, 250)
   },
   methods: {
     highlighter (code) {
       return highlight(code, languages.ugo)
     },
     onRun () {
+      if (this.loading) return
       this.result = null
       this.loading = true
       try {
-        global.runUGO(this, this.code)
+        this.worker.runUGO(proxy(this), this.code.toString())
       } catch (err) {
         console.log(err)
         this.result = { error: err.toString() }
-      } finally {
         this.loading = false
       }
     },

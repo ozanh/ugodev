@@ -38,7 +38,7 @@ UGO_PATH="$(go list -m -f {{.Dir}} github.com/ozanh/ugo)"
 UGO_VERSION="$(go list -m -f {{.Version}} github.com/ozanh/ugo)"
 
 # create ugo.wasm file in current working dir
-GOOS=js GOARCH=wasm go build -o ./ugo.wasm \
+GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o ./ugo.wasm \
     github.com/ozanh/ugodev/playground/cmd/wasm
 
 cat >> "$ENV_FILE" << EOF
