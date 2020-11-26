@@ -2,15 +2,17 @@ const CopyPlugin = require('copy-webpack-plugin')
 const LicenseCheckerWebpackPlugin = require('license-checker-webpack-plugin')
 const { resolve } = require('path')
 
-process.env.VUE_APP_PLAYGROUND_VERSION = require('./package.json').version
-process.env.VUE_APP_LICENSE_PATH = 'static/LICENSE.txt'
-process.env.VUE_APP_THIRD_PARTY_PATH = 'static/ThirdPartyNotices.txt'
+const env = process.env
+env.VUE_APP_PLAYGROUND_VERSION = require('./package.json').version
+env.VUE_APP_LICENSE_PATH = 'static/LICENSE.txt'
+env.VUE_APP_THIRD_PARTY_PATH = 'static/ThirdPartyNotices.txt'
 
 const outputDir = 'dist'
 
-if (process.env.VUE_APP_GO_LICENSE &&
-  process.env.VUE_APP_TENGO_LICENSE &&
-  process.env.VUE_APP_THIRD_PARTY_PATH) {
+if (env.NODE_ENV === 'production' &&
+  env.VUE_APP_GO_LICENSE &&
+  env.VUE_APP_TENGO_LICENSE &&
+  env.VUE_APP_THIRD_PARTY_PATH) {
   // append license file contents of Go and other Go libraries to ThirdPartyNotices
   process.on('exit', (code) => {
     if (code !== 0) {
@@ -18,11 +20,11 @@ if (process.env.VUE_APP_GO_LICENSE &&
     }
     const fs = require('fs')
     for (const file of [
-      process.env.VUE_APP_GO_LICENSE,
-      process.env.VUE_APP_TENGO_LICENSE
+      env.VUE_APP_GO_LICENSE,
+      env.VUE_APP_TENGO_LICENSE
     ]) {
       const s = fs.readFileSync(file, { encoding: 'utf8' })
-      const target = resolve(outputDir, process.env.VUE_APP_THIRD_PARTY_PATH)
+      const target = resolve(outputDir, env.VUE_APP_THIRD_PARTY_PATH)
       try {
         fs.appendFileSync(target, `\n${'-'.repeat(80)}\n\n`, 'utf8')
         fs.appendFileSync(target, s, 'utf8')
@@ -34,15 +36,15 @@ if (process.env.VUE_APP_GO_LICENSE &&
 }
 
 let copyFiles = []
-if (process.env.VUE_APP_LICENSE && process.env.VUE_APP_LICENSE_PATH &&
-  process.env.VUE_APP_WASM_EXEC_FILE) {
+if (env.VUE_APP_LICENSE && env.VUE_APP_LICENSE_PATH &&
+  env.VUE_APP_WASM_EXEC_FILE) {
   copyFiles = [
     {
-      from: resolve(__dirname, process.env.VUE_APP_LICENSE),
-      to: process.env.VUE_APP_LICENSE_PATH
+      from: resolve(__dirname, env.VUE_APP_LICENSE),
+      to: env.VUE_APP_LICENSE_PATH
     },
     {
-      from: resolve(__dirname, process.env.VUE_APP_WASM_EXEC_FILE),
+      from: resolve(__dirname, env.VUE_APP_WASM_EXEC_FILE),
       to: 'static/js'
     }
   ]
@@ -63,7 +65,7 @@ module.exports = {
       new CopyPlugin(copyFiles),
       new LicenseCheckerWebpackPlugin({
         allow: '(Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause OR MIT OR ISC)',
-        outputFilename: process.env.VUE_APP_THIRD_PARTY_PATH,
+        outputFilename: env.VUE_APP_THIRD_PARTY_PATH,
         emitError: true
       })
     ]
@@ -84,7 +86,7 @@ module.exports = {
         options = options || {}
         options.inline = 'fallback'
         options.filename = 'static/js/[name].js'
-        if (process.env.NODE_ENV !== 'production') {
+        if (env.NODE_ENV !== 'production') {
           // FIXME: Setting publicPath is required for worker-loader to work
           // properly until a solution is found. Following Open PR may fix this
           // bug: https://github.com/webpack-contrib/worker-loader/pull/291
