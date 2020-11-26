@@ -83,4 +83,4 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	rm -f ./dist ./coverage ./node_modules/.cache
+	rm -rf ./dist ./coverage ./node_modules/.cache
