@@ -5,6 +5,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"syscall/js"
@@ -13,7 +14,10 @@ import (
 	"github.com/ozanh/ugo"
 	ugostrings "github.com/ozanh/ugo/stdlib/strings"
 	ugotime "github.com/ozanh/ugo/stdlib/time"
+	"github.com/ozanh/ugodev/patcher"
 )
+
+const maxExecDuration = 10 * time.Second
 
 var stdout = bytes.NewBuffer(nil)
 
@@ -103,6 +107,10 @@ func runWrapper() js.Func {
 				callback(newResult(err.Error(), "", mt.output()))
 				return
 			}
+			if _, err = patcher.Gosched(bc, 1000); err != nil {
+				callback(newResult(err.Error(), "", mt.output()))
+				return
+			}
 			var ret ugo.Object
 			var waitCh = make(chan struct{})
 			vm := ugo.NewVM(bc)
@@ -112,7 +120,7 @@ func runWrapper() js.Func {
 				defer mt.initExec()()
 				ret, err = vm.Run(nil)
 			}()
-			tm := time.NewTimer(10 * time.Second)
+			tm := time.NewTimer(maxExecDuration)
 			defer tm.Stop()
 			select {
 			case <-tm.C:
@@ -121,12 +129,16 @@ func runWrapper() js.Func {
 			}
 			<-waitCh
 			if err != nil {
+				if errors.Is(err, ugo.ErrVMAborted) {
+					err = fmt.Errorf("%w %s playground max execution time",
+						err, maxExecDuration.String())
+				}
 				e := fmt.Sprintf("%+v", err)
 				callback(newResult(e, "", mt.output()))
 				return
 			}
 			if ret != nil {
-				s, err := ugoToJSON(ret)
+				s, err := json.Marshal(conv(ret))
 				if err != nil {
 					callback(newResult(err.Error(), ret.String(), mt.output()))
 					return
@@ -138,10 +150,6 @@ func runWrapper() js.Func {
 		}()
 		return nil
 	})
-}
-
-func ugoToJSON(v ugo.Object) ([]byte, error) {
-	return json.Marshal(conv(v))
 }
 
 func conv(v ugo.Object) interface{} {
