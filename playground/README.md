@@ -7,7 +7,7 @@ WebAssembly.
 As of now (Go 1.15) Go's WebAssembly support is experimental so is uGO. Although
 it is experimental, all uGO tests are passed with `GOOS=js GOARCH=wasm`
 environment variables. Use following command to test and see
-[build-go.bash](build-go.bash) script to check how each package is tested.
+[Makefile](Makefile) script to check how each package is tested.
 
 ```sh
 GOOS=js GOARCH=wasm go test -cover \
@@ -22,8 +22,8 @@ nodejs which removes server communication and sandboxing requirements.
 In addition, WebAssembly is the future of the web.
 
 > *Go's WebAssembly binaries are big! But not that big*. Built wasm file size
-is about 5MB and which can be served as gzipped. In the end, client loads about
-1.5MB of data to run playground including all wasm, js, css and other assets.
+is about 4.7MB and which can be served as gzipped. In the end, client loads about
+1.3MB of data to run playground including all wasm, js, css and other assets.
 
 ## Project setup
 
@@ -97,7 +97,7 @@ npm run test
 
 ### Customize configuration
 
-See [build-go.bash](build-go.bash) file for testing and building Go packages.
+See [Makefile](Makefile) file for testing and building.
 
 See [vue.config.js](vue.config.js) file for Vue settings ([Configuration
 Reference](https://cli.vuejs.org/config/)).
