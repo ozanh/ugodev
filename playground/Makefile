@@ -79,7 +79,7 @@ test: clean install --append
 
 .PHONY: clean
 clean:
-	rm -rf ./.env.local ./.env.*.local ./wasm_exec.*.js ./ugo.wasm
+	rm -rf ./.env.local ./.env.*.local ./wasm_exec.js ./wasm_exec.*.js ./ugo.wasm
 
 .PHONY: distclean
 distclean: clean
