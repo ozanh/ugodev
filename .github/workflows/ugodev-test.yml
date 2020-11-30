@@ -44,7 +44,7 @@ jobs:
     - name: Test patcher
       working-directory: ./patcher
       run: |
-        go test -race ./...
+        go test -race -cover ./...
 
     - name: Build and Test Playground
       working-directory: ./playground
