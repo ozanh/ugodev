@@ -40,6 +40,11 @@ jobs:
       working-directory: ./cmd/ugodoc
       run: |
         go build .
+    
+    - name: Test patcher
+      working-directory: ./patcher
+      run: |
+        go test -race ./...
 
     - name: Build and Test Playground
       working-directory: ./playground
