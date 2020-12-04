@@ -9,7 +9,7 @@ d := "text" // string
 e := 3.14   // float
 
 // compiled-function
-var fn = func(v) {
+const fn = func(v) {
   strings := import("strings")
   if strings.ToLower(v) != "ugo" {
     return "", error("wrong argument")
@@ -44,19 +44,21 @@ for v in arr {
 */
 
 // slicing
-var (s1 = arr[:2],
-     s2 = arr[2:])
+var (
+    s1 = arr[:2]
+    s2 = arr[2:]
+)
 println("s1:", s1, "\ns2:", s2)
 println("hello world"[1:5])
 
 // sum given numbers
-sum := func(...nums) {
-  var total = 0
-  for i, v in nums {
-    total += nums[i]
+const sum = func(...nums) {
+    var total = 0
+    for i, v in nums {
+      total += nums[i]
+    }
+    return total
   }
-  return total
-}
 
 nums := [1, 2, 3, 4, 5, 6]
 println(sum(...nums))  // expand array
@@ -107,10 +109,14 @@ func(...args) {
 v7 := v2 > v3 ? v2 << 1 : v2 >> 1
 println(v7)
 
+// calculate fibonacci number
+var fib
+fib = func(x) { return x <= 1 ? x : fib(x-1) + fib(x-2) }
+println("fibonacci(6)=>", fib(6))
+
 // create a map
 m := {a: 1, b: 2.0, c: string(v7),
-      fn: func(x) { return x+1 }
-    }
+      fn: func(x) { return x+1 }}
 
 // use .key or ["key"] notations to access keys
 m.test = "test"
