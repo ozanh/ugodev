@@ -255,7 +255,7 @@ func concatInsts(insts ...[]byte) []byte {
 }
 
 func makeInst(op Opcode, args ...int) []byte {
-	inst, err := MakeInstruction(op, args...)
+	inst, err := MakeInstruction(make([]byte, 8), op, args...)
 	if err != nil {
 		panic(err)
 	}

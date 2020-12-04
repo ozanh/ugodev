@@ -30,17 +30,18 @@ func Gosched(bc *ugo.Bytecode, callCount int64) (int, error) {
 	*/
 	constIndex := len(bc.Constants)
 	insert := make([]byte, 0, 7)
-	b, err := ugo.MakeInstruction(ugo.OpConstant, constIndex)
+	b := make([]byte, 8)
+	b, err := ugo.MakeInstruction(b, ugo.OpConstant, constIndex)
 	if err != nil {
 		return 0, err
 	}
 	insert = append(insert, b...)
-	b, err = ugo.MakeInstruction(ugo.OpCall, 0, 0)
+	b, err = ugo.MakeInstruction(b, ugo.OpCall, 0, 0)
 	if err != nil {
 		return 0, err
 	}
 	insert = append(insert, b...)
-	b, err = ugo.MakeInstruction(ugo.OpPop)
+	b, err = ugo.MakeInstruction(b, ugo.OpPop)
 	if err != nil {
 		return 0, err
 	}
@@ -225,7 +226,8 @@ func (bp *bytecodePatcher) updateJumps() error {
 			operands,
 		)
 		operands[v.operand] = v.jump
-		insts, err := ugo.MakeInstruction(v.opcode, operands...)
+		insts := make([]byte, 8)
+		insts, err := ugo.MakeInstruction(insts, v.opcode, operands...)
 		if err != nil {
 			return fmt.Errorf("updateJumps: %w", err)
 		}
