@@ -8,9 +8,9 @@ ENV_FILE=.env.local
 UGO_PATH="$(shell go list -m -f {{.Dir}} github.com/ozanh/ugo)"
 UGO_VERSION="$(shell go list -m -f {{.Version}} github.com/ozanh/ugo)"
 
-GOOS=js
-GOARCH=wasm
+
 GOLDFLAGS=-s -w
+COVER_FILE ?= ./cover.out
 
 BUILD_TIME=$(shell date -u +'%Y-%m-%d_%T')
 JS_WASM_EXEC="$(shell go env GOROOT)/misc/wasm/go_js_wasm_exec"
@@ -56,7 +56,7 @@ wasm_exec.js: # copy wasm_exec.js to current working dir
 	cp "$(shell go env GOROOT)/misc/wasm/wasm_exec.js" ./wasm_exec.js
 
 ugo.wasm: # create ugo.wasm file in current working dir
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="$(GOLDFLAGS)" -o ./ugo.wasm \
+	GOOS=js GOARCH=wasm go build -ldflags="$(GOLDFLAGS)" -o ./ugo.wasm \
     	github.com/ozanh/ugodev/playground/cmd/wasm
 
 .PHONY: development
@@ -72,14 +72,15 @@ production: distclean install
 .PHONY: test
 test: clean install --append
 	mv $(ENV_FILE) .env.$@.local
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go test -cover -exec="$(JS_WASM_EXEC)" \
+	GOOS=js GOARCH=wasm go test -cover -exec=$(JS_WASM_EXEC) \
         github.com/ozanh/ugo/...
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go test -cover -exec="$(JS_WASM_EXEC)" \
-        github.com/ozanh/ugodev/playground/cmd/wasm
+	GOOS=js GOARCH=wasm go test -cover -exec=$(JS_WASM_EXEC) \
+        -coverprofile $(COVER_FILE) ./cmd/wasm
 
 .PHONY: clean
 clean:
-	rm -rf ./.env.local ./.env.*.local ./wasm_exec.js ./wasm_exec.*.js ./ugo.wasm
+	rm -rf ./.env.local ./.env.*.local ./wasm_exec.js ./wasm_exec.*.js \
+        ./ugo.wasm $(COVER_FILE)
 
 .PHONY: distclean
 distclean: clean
