@@ -115,8 +115,10 @@ fib = func(x) { return x <= 1 ? x : fib(x-1) + fib(x-2) }
 println("fibonacci(6)=>", fib(6))
 
 // create a map
-m := {a: 1, b: 2.0, c: string(v7),
-      fn: func(x) { return x+1 }}
+m := {
+      a: 1, b: 2.0, c: string(v7),
+      fn: func(x) { return x+1 },
+     }
 
 // use .key or ["key"] notations to access keys
 m.test = "test"
@@ -143,13 +145,23 @@ for k,v in m {
 }
 println(arr)
 
-// import stdlib time module
-time := import("time")
+// import stdlib fmt module
+fmt := import("fmt")
 // import stdlib strings module
 strings := import("strings")
+// import stdlib time module
+time := import("time")
+
+// scan arguments
+arg1 := fmt.ScanArg("string")
+arg2 := fmt.ScanArg("int")
+r := fmt.Sscanf("abc 123", "%s%d", arg1, arg2)
+// this is printed to your browser console
+fmt.Println("n:", r, arg1.Value, arg2.Value)
 
 // add 1 hour to now and print with RFC3339Nano layout
-println(time.Format(time.Now() + time.Hour, time.RFC3339Nano))
+// this is printed to your browser console
+fmt.Println(time.Format(time.Now() + time.Hour, time.RFC3339Nano))
 
 // string padding
 s := strings.PadLeft(string(int("1_984")), 8, "=>")
@@ -157,7 +169,7 @@ s = strings.PadRight(s, 12, "<=")
 println(s,
         sprintf("\n  has %d '=>' and %d '<='",
         strings.Count(s, "=>"),
-        strings.Count(s, "<="))
+        strings.Count(s, "<=")),
 )
 
 // Error Handling

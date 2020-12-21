@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ozanh/ugo"
+	ugofmt "github.com/ozanh/ugo/stdlib/fmt"
 	ugostrings "github.com/ozanh/ugo/stdlib/strings"
 	ugotime "github.com/ozanh/ugo/stdlib/time"
 	"github.com/ozanh/ugodev/patcher"
@@ -75,6 +76,7 @@ func runWrapper() js.Func {
 	mm := ugo.NewModuleMap()
 	mm.AddBuiltinModule("time", ugotime.Module)
 	mm.AddBuiltinModule("strings", ugostrings.Module)
+	mm.AddBuiltinModule("fmt", ugofmt.Module)
 	opts := ugo.DefaultCompilerOptions
 	opts.ModuleMap = mm
 

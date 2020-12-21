@@ -9,6 +9,7 @@ import (
 
 	"github.com/ozanh/ugo"
 	"github.com/ozanh/ugo/parser"
+	ugofmt "github.com/ozanh/ugo/stdlib/fmt"
 	ugostrings "github.com/ozanh/ugo/stdlib/strings"
 	ugotime "github.com/ozanh/ugo/stdlib/time"
 )
@@ -116,7 +117,8 @@ func checkWrapper() js.Func {
 	opts := ugo.DefaultCompilerOptions
 	opts.ModuleMap = ugo.NewModuleMap().
 		AddBuiltinModule("time", ugotime.Module).
-		AddBuiltinModule("strings", ugostrings.Module)
+		AddBuiltinModule("strings", ugostrings.Module).
+		AddBuiltinModule("fmt", ugofmt.Module)
 
 	return js.FuncOf(func(this js.Value, args []js.Value) (value interface{}) {
 		if len(args) != 2 {

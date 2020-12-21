@@ -31,6 +31,7 @@ import (
 
 	"github.com/ozanh/ugo"
 
+	ugofmt "github.com/ozanh/ugo/stdlib/fmt"
 	ugostrings "github.com/ozanh/ugo/stdlib/strings"
 	ugotime "github.com/ozanh/ugo/stdlib/time"
 )
@@ -179,6 +180,9 @@ func getModuleItem(module, key string) string {
 		goto found
 	case "strings":
 		moduleMap = ugostrings.Module
+		goto found
+	case "fmt":
+		moduleMap = ugofmt.Module
 		goto found
 	default:
 		panic(fmt.Errorf("unknown module:%s", module))
