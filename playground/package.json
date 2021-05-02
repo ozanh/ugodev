@@ -1,6 +1,6 @@
 {
   "name": "ugo-playground",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": true,
   "description": "uGO Playground",
   "author": {
@@ -77,7 +77,7 @@
       }
     ],
     "ignorePatterns": [
-      "wasm_exec.js"
+      "wasm_exec.*js"
     ]
   },
   "browserslist": [
