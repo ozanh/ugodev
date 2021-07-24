@@ -40,7 +40,7 @@
           </a>
         </div>
         <div class="copyright">
-          Copyright © 2020 Ozan Hacıbekiroğlu
+          Copyright © 2020-2021 Ozan Hacıbekiroğlu
         </div>
       </div>
       <div class="body-container">
@@ -103,7 +103,7 @@
         <template #body>
           <p>
             uGO Playground is a single page application to test uGO scripts in the browser.<br>
-            Thanks to Go's <b>experimental</b> WebAssembly support, uGO and stdlib modules are compiled for WebAssembly.<br>
+            Thanks to Go's WebAssembly support, uGO and stdlib modules are compiled for WebAssembly.<br>
             Note that native performance of uGO is much faster than WebAssembly port.<br><br>
             <a
               :href="'/'+license"
@@ -128,7 +128,7 @@
               href="https://github.com/ozanh/ugodev/tree/main/playground"
               target="_blank"
             >uGO Playground</a><br>
-            Copyright © 2020 Ozan Hacıbekiroğlu
+            Copyright © 2020-2021 Ozan Hacıbekiroğlu
           </p>
         </template>
 

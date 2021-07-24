@@ -12,14 +12,6 @@ describe('Modal.vue', () => {
     expect(wrapper.vm.showModal).toBe(false)
   })
 
-  it('showModal true no slots', () => {
-    const wrapper = mount(Modal, {
-      props: { showModal: true }
-    })
-    expect(wrapper.html()).toMatch(/.*<div class="modal">.*Default Body.*Default Footer.*/)
-    expect(wrapper.vm.showModal).toBe(true)
-  })
-
   it('showModal true slots', async () => {
     const wrapper = mount(Modal, {
       props: { showModal: true },
