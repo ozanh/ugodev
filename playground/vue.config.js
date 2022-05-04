@@ -1,3 +1,4 @@
+const { defineConfig } = require('@vue/cli-service')
 const CopyPlugin = require('copy-webpack-plugin')
 const LicenseCheckerWebpackPlugin = require('license-checker-webpack-plugin')
 const { resolve } = require('path')
@@ -50,7 +51,22 @@ if (env.VUE_APP_LICENSE && env.VUE_APP_LICENSE_PATH &&
   ]
 }
 
-module.exports = {
+const plugins = [
+  new LicenseCheckerWebpackPlugin({
+    allow: '(Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause OR MIT OR ISC)',
+    outputFilename: env.VUE_APP_THIRD_PARTY_PATH,
+    emitError: true,
+    filter: /(^.*[/\\]node_modules[/\\]((?:@[^/\\]+[/\\])?(?:[^@/\\][^/\\]*)))/
+  })
+]
+
+if (copyFiles.length > 0) {
+  plugins.push(new CopyPlugin({ patterns: copyFiles }))
+}
+
+module.exports = defineConfig({
+  transpileDependencies: true,
+  parallel: false,
   productionSourceMap: false,
   outputDir: outputDir,
   assetsDir: 'static',
@@ -61,14 +77,7 @@ module.exports = {
     optimization: {
       splitChunks: false
     },
-    plugins: [
-      new CopyPlugin(copyFiles),
-      new LicenseCheckerWebpackPlugin({
-        allow: '(Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause OR MIT OR ISC)',
-        outputFilename: env.VUE_APP_THIRD_PARTY_PATH,
-        emitError: true
-      })
-    ]
+    plugins: plugins
   },
   chainWebpack: config => {
     config.module
@@ -112,4 +121,4 @@ module.exports = {
       })
       .end()
   }
-}
+})

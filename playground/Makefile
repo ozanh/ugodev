@@ -5,8 +5,8 @@ MAKEFLAGS += --warn-undefined-variables
 
 ENV_FILE=.env.local
 
-UGO_PATH="$(shell go list -m -f {{.Dir}} github.com/ozanh/ugo)"
-UGO_VERSION="$(shell go list -m -f {{.Version}} github.com/ozanh/ugo)"
+UGO_PATH=$(shell go list -m -f {{.Dir}} github.com/ozanh/ugo)
+UGO_VERSION=$(shell go list -m -f {{.Version}} github.com/ozanh/ugo)
 
 GOOS=js
 GOARCH=wasm

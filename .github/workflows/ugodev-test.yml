@@ -28,30 +28,29 @@ jobs:
     - name: Get Go dependencies
       run: |
         go get -v -t -d ./...
-        go get -u golang.org/x/lint/golint
         go get -u honnef.co/go/tools/cmd/staticcheck
     
     - name: Lint Go
-      run: |
-        golint -set_exit_status ./...
-        staticcheck ./...
-    
-    - name: Build ugodoc
-      working-directory: ./cmd/ugodoc
-      run: |
-        go build .
+      run: staticcheck ./...
     
     - name: Test patcher
       working-directory: ./patcher
-      run: |
-        go test -race -cover ./...
+      run: go test -race -cover ./...
 
-    - name: Build and Test Playground
+    - name: Build Playground
       working-directory: ./playground
       run: |
-        npm install
-        npm run lint
-        npm run build
-        npm run test
+        npm install --global yarn
+        yarn install
+        yarn run lint
+        yarn run build
+      env:
+        CI: true
+    
+    - name: Test Playground
+      working-directory: ./playground
+      run: |
+        make test
+        yarn run test
       env:
         CI: true

@@ -190,6 +190,7 @@ import code from '../../cmd/wasm/testdata/sample.ugo'
 import Worker from '../wasm.worker'
 
 export default {
+  // eslint-disable-next-line
   name: 'Playground',
   components: {
     PrismEditor,

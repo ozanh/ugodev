@@ -47,6 +47,7 @@
 
 <script>
 export default {
+  // eslint-disable-next-line
   name: 'Modal',
   props: {
     showModal: {
