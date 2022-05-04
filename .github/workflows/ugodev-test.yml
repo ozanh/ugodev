@@ -25,10 +25,13 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
-    - name: Get Go dependencies
+    - name: Install Staticcheck
       run: |
-        go get -v -t -d ./...
-        go get -u honnef.co/go/tools/cmd/staticcheck
+        GOBIN=${GOBIN:-"$HOME/go/bin"}
+        mkdir -p "$GOBIN"
+        echo "$GOBIN" >> "$GITHUB_PATH"
+        export GO111MODULE=on
+        cd "$GOBIN" && go get honnef.co/go/tools/cmd/staticcheck@2021.1
     
     - name: Lint Go
       run: staticcheck ./...
