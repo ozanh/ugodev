@@ -172,6 +172,11 @@ println(s,
         strings.Count(s, "<=")),
 )
 
+// import json module
+json := import("json")
+println("json:", json.Marshal({a:10, b:undefined}))
+
+
 // Error Handling
 
 // 1. Return error as a value
