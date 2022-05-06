@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	. "github.com/ozanh/ugo"
-
 	"github.com/ozanh/ugodev/patcher"
+
+	. "github.com/ozanh/ugo"
 )
 
 func TestGosched(t *testing.T) {

@@ -40,7 +40,7 @@
           </a>
         </div>
         <div class="copyright">
-          Copyright © 2020-2021 Ozan Hacıbekiroğlu
+          Copyright © 2020-2022 Ozan Hacıbekiroğlu
         </div>
       </div>
       <div class="body-container">
@@ -128,7 +128,7 @@
               href="https://github.com/ozanh/ugodev/tree/main/playground"
               target="_blank"
             >uGO Playground</a><br>
-            Copyright © 2020-2021 Ozan Hacıbekiroğlu
+            Copyright © 2020-2022 Ozan Hacıbekiroğlu
           </p>
         </template>
 
@@ -190,6 +190,7 @@ import code from '../../cmd/wasm/testdata/sample.ugo'
 import Worker from '../wasm.worker'
 
 export default {
+  // eslint-disable-next-line
   name: 'Playground',
   components: {
     PrismEditor,

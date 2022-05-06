@@ -4,37 +4,17 @@ uGO Playground is a single page web application to create playground for
 [uGO](https://github.com/ozanh/ugo) script language. Playground is built for
 WebAssembly.
 
-As of now (Go 1.15) Go's WebAssembly support is experimental so is uGO. Although
-it is experimental, all uGO tests are passed with `GOOS=js GOARCH=wasm`
-environment variables. Use following command to test and see
-[Makefile](Makefile) script to check how each package is tested.
-
-```sh
-GOOS=js GOARCH=wasm go test -cover \
-        -exec="$(go env GOROOT)/misc/wasm/go_js_wasm_exec" \
-        github.com/ozanh/ugo/...
-```
-
-## Why WebAssembly
-
-Thanks to Go's WebAssembly builds, scripts run in clients' web browser or in
-nodejs which removes server communication and sandboxing requirements.
-In addition, WebAssembly is the future of the web.
-
-> *Go's WebAssembly binaries are big! But not that big*. Built wasm file size
-is about 4.7MB and which can be served as gzipped. In the end, client loads about
-1.3MB of data to run playground including all wasm, js, css and other assets.
-
 ## Project setup
 
 Install followings:
 
-- go v1.15
-- node v12
+- go v1.17
+- node v14
 - npm
+- yarn
 
 ```sh
-go get -u github.com/ozanh/ugo
+go install github.com/ozanh/ugo@latest
 ```
 
 It is recommended to install `Vue CLI` npm packages globally for
@@ -42,13 +22,13 @@ development purposes. See detailed `Vue CLI` installation instructions
 [here](https://cli.vuejs.org/guide/installation.html).
 
 ```sh
-npm install -g @vue/cli @vue/cli-service-global
+yarn global add @vue/cli
 ```
 
 Install all node dependencies with the following:
 
 ```sh
-npm install
+yarn install
 ```
 
 Use `vue ui` command to access to awesome Vue GUI to serve/build/test instantly.
@@ -56,13 +36,15 @@ Use `vue ui` command to access to awesome Vue GUI to serve/build/test instantly.
 ### Compiles and hot-reloads for development
 
 ```sh
-npm run serve
+make development
+yarn run serve
 ```
 
 ### Compiles and minifies for production
 
 ```sh
-npm run build
+make production
+yarn run build
 ```
 
 Built files are placed in `dist` directory.
@@ -86,13 +68,14 @@ Usage
 ### Lints and fixes files
 
 ```sh
-npm run lint
+yarn run lint
 ```
 
 ### Test Go and JS
 
 ```sh
-npm run test
+make test
+yarn run test
 ```
 
 ### Customize configuration

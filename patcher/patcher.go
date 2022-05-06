@@ -1,4 +1,5 @@
 // Package patcher is a library to handle modification of uGO Bytecode.
+
 package patcher
 
 import (

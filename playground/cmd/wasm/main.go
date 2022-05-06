@@ -1,3 +1,4 @@
+//go:build js && wasm
 // +build js,wasm
 
 package main
@@ -12,10 +13,12 @@ import (
 	"time"
 
 	"github.com/ozanh/ugo"
+	"github.com/ozanh/ugodev/patcher"
+
 	ugofmt "github.com/ozanh/ugo/stdlib/fmt"
+	ugojson "github.com/ozanh/ugo/stdlib/json"
 	ugostrings "github.com/ozanh/ugo/stdlib/strings"
 	ugotime "github.com/ozanh/ugo/stdlib/time"
-	"github.com/ozanh/ugodev/patcher"
 )
 
 const maxExecDuration = 10 * time.Second
@@ -28,7 +31,6 @@ func init() {
 
 type metrics struct {
 	start   time.Time
-	elapsed time.Duration
 	compile time.Duration
 	exec    time.Duration
 }
@@ -73,10 +75,12 @@ func newResult(
 }
 
 func runWrapper() js.Func {
-	mm := ugo.NewModuleMap()
-	mm.AddBuiltinModule("time", ugotime.Module)
-	mm.AddBuiltinModule("strings", ugostrings.Module)
-	mm.AddBuiltinModule("fmt", ugofmt.Module)
+	mm := ugo.NewModuleMap().
+		AddBuiltinModule("time", ugotime.Module).
+		AddBuiltinModule("strings", ugostrings.Module).
+		AddBuiltinModule("fmt", ugofmt.Module).
+		AddBuiltinModule("json", ugojson.Module)
+
 	opts := ugo.DefaultCompilerOptions
 	opts.ModuleMap = mm
 
