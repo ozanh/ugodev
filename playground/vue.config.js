@@ -1,7 +1,7 @@
 const { defineConfig } = require('@vue/cli-service')
 const CopyPlugin = require('copy-webpack-plugin')
 const LicenseCheckerWebpackPlugin = require('license-checker-webpack-plugin')
-const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
 const { resolve } = require('path')
 
 const env = process.env
