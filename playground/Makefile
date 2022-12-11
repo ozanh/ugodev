@@ -48,29 +48,30 @@ install: ugo.wasm wasm_exec.js
 	"VUE_APP_GO_LICENSE=$(UGO_PATH)/LICENSE.golang\n"\
 	"VUE_APP_TENGO_LICENSE=$(UGO_PATH)/LICENSE.tengo\n" > $(ENV_FILE)
 
-.PHONY: --append
---append:
+.PHONY: append-wasm-exec
+append-wasm-exec:
 	echo "VUE_APP_WASM_EXEC_FILE=wasm_exec.js" >> $(ENV_FILE)
 
+.PHONY: wasm_exec.js
 wasm_exec.js: # copy wasm_exec.js to current working dir
 	cp "$(shell go env GOROOT)/misc/wasm/wasm_exec.js" ./wasm_exec.js
+	cp ./wasm_exec.js ./wasm_exec.$$(md5sum ./wasm_exec.js | cut -c1-8).js
 
 ugo.wasm: # create ugo.wasm file in current working dir
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="$(GOLDFLAGS)" -o ./ugo.wasm \
     	github.com/ozanh/ugodev/playground/cmd/wasm
 
 .PHONY: development
-development: clean install --append
+development: clean install append-wasm-exec
 	mv $(ENV_FILE) .env.$@.local
 
 .PHONY: production
 production: distclean install
-	mv wasm_exec.js "wasm_exec.$(shell md5sum wasm_exec.js | cut -c1-8).js"
-	echo "VUE_APP_WASM_EXEC_FILE=$(wildcard wasm_exec.*.js)" >> $(ENV_FILE)
+	echo "VUE_APP_WASM_EXEC_FILE=$$(ls wasm_exec.*.js)" >> $(ENV_FILE)
 	mv $(ENV_FILE) .env.$@.local
 
 .PHONY: test
-test: clean install --append
+test: clean install append-wasm-exec
 	mv $(ENV_FILE) .env.$@.local
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go test -cover -exec="$(JS_WASM_EXEC)" \
         github.com/ozanh/ugo/...
