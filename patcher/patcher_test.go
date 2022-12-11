@@ -186,18 +186,17 @@ Instructions:
 0055 POP
 0056 JUMP            30
 0059 SETUPFINALLY
-0060 NULL
-0061 RETURN          0
-0063 THROW           0
-0065 RETURN          0
-SourceMap:map[7:8 10:3 12:11 17:25 19:19 21:30 22:11 24:11 27:30 28:30 30:48 32:52 35:48 37:44 40:59 42:60 45:59 47:59 56:44 59:70 60:82 61:82 63:11 65:0]
+0060 RETURN          0
+0062 THROW           0
+0064 RETURN          0
+SourceMap:map[7:8 10:3 12:11 17:25 19:19 21:30 22:11 24:11 27:30 28:30 30:48 32:52 35:48 37:44 40:59 42:60 45:59 47:59 56:44 59:70 60:82 62:11 64:0]
 `
 		var buf bytes.Buffer
 		bc.Main.Fprint(&buf)
 		got := buf.String()
 		expected = trimLines(expected)
 		got = trimLines(got)
-		require.Equalf(t, expected, got, "Got:\n%s\nOriginal:\n%s", got, orig)
+		require.Equalf(t, expected, got, "Got:\n%s\n\nOriginal:\n%s", got, orig)
 	})
 	expectCompile(t, `
 	a := 2
@@ -223,11 +222,10 @@ Instructions:
 0017 GETLOCAL        0
 0019 THROW           1
 0021 SETUPFINALLY
-0022 NULL
-0023 RETURN          0
-0025 THROW           0
-0027 RETURN          0
-SourceMap:map[7:8 10:3 12:11 17:25 19:19 21:30 22:42 23:42 25:11 27:0]
+0022 RETURN          0
+0024 THROW           0
+0026 RETURN          0
+SourceMap:map[7:8 10:3 12:11 17:25 19:19 21:30 22:42 24:11 26:0]
 `
 		var buf bytes.Buffer
 		bc.Main.Fprint(&buf)
