@@ -1,6 +1,7 @@
 const { defineConfig } = require('@vue/cli-service')
 const CopyPlugin = require('copy-webpack-plugin')
 const LicenseCheckerWebpackPlugin = require('license-checker-webpack-plugin')
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 const { resolve } = require('path')
 
 const env = process.env
@@ -57,7 +58,8 @@ const plugins = [
     outputFilename: env.VUE_APP_THIRD_PARTY_PATH,
     emitError: true,
     filter: /(^.*[/\\]node_modules[/\\]((?:@[^/\\]+[/\\])?(?:[^@/\\][^/\\]*)))/
-  })
+  }),
+  new NodePolyfillPlugin()
 ]
 
 if (copyFiles.length > 0) {
