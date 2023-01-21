@@ -40,7 +40,7 @@
           </a>
         </div>
         <div class="copyright">
-          Copyright © 2020-2022 Ozan Hacıbekiroğlu
+          Copyright © 2020-2023 Ozan Hacıbekiroğlu
         </div>
       </div>
       <div class="body-container">
@@ -128,7 +128,7 @@
               href="https://github.com/ozanh/ugodev/tree/main/playground"
               target="_blank"
             >uGO Playground</a><br>
-            Copyright © 2020-2022 Ozan Hacıbekiroğlu
+            Copyright © 2020-2023 Ozan Hacıbekiroğlu
           </p>
         </template>
 
@@ -214,7 +214,7 @@ export default {
     thirdParty: process.env.VUE_APP_THIRD_PARTY_PATH,
     showAboutModal: false,
     showWASMErrorModal: false,
-    code: code,
+    code,
     linesMsgs: {},
     loading: true,
     result: null,
