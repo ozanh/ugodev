@@ -100,7 +100,7 @@ v6 := bool("abc")     // true
 func(...args) {
   arr := repeat([undefined], len(args))
   for i,v in args {
-    arr[i] = sprintf("%s:%s", typeName(v), v)
+    arr[i] = sprintf("%s:%v", typeName(v), v)
   }
   println(arr)
 }(v1, v2, v3, v4, v5, v6)
@@ -139,8 +139,8 @@ println(m.fn(10))
 // map iterations are randomized
 // iterate map and append map key and value to an array
 arr = []
-for k,v in m {
-  printf("key:%s value:%s\n", k, v)
+for k, v in m {
+  printf("key:%s value:%v\n", k, v)
   arr = append(arr, k, v)
 }
 println(arr)
@@ -174,7 +174,7 @@ println(s,
 
 // import json module
 json := import("json")
-println("json:", json.Marshal({a:10, b:undefined}))
+printf("json: %s\n", json.Marshal({a:10, b:undefined}))
 
 
 // Error Handling
