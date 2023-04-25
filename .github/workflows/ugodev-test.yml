@@ -11,7 +11,7 @@ on:
       - development
 
 env:
-  GO_VERSION: '1.19.4'
+  GO_VERSION: '1.20.3'
 
 jobs:
   govulncheck:
