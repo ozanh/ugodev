@@ -3,8 +3,8 @@ module github.com/ozanh/ugodev
 go 1.19
 
 require (
-	github.com/ozanh/ugo v0.3.1
-	github.com/stretchr/testify v1.8.1
+	github.com/ozanh/ugo v0.4.0
+	github.com/stretchr/testify v1.8.2
 )
 
 require (

@@ -70,7 +70,7 @@ module.exports = defineConfig({
   transpileDependencies: true,
   parallel: false,
   productionSourceMap: false,
-  outputDir: outputDir,
+  outputDir,
   assetsDir: 'static',
   css: {
     extract: false
@@ -79,7 +79,7 @@ module.exports = defineConfig({
     optimization: {
       splitChunks: false
     },
-    plugins: plugins
+    plugins
   },
   chainWebpack: config => {
     config.module
