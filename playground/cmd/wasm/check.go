@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"syscall/js"
 
-	"github.com/ozanh/ugo"
-	"github.com/ozanh/ugo/parser"
-
 	ugofmt "github.com/ozanh/ugo/stdlib/fmt"
 	ugojson "github.com/ozanh/ugo/stdlib/json"
 	ugostrings "github.com/ozanh/ugo/stdlib/strings"
 	ugotime "github.com/ozanh/ugo/stdlib/time"
+
+	"github.com/ozanh/ugo"
+	"github.com/ozanh/ugo/parser"
 )
 
 // linesErrors returns line numbers and assoc. error messages thrown by parser,
@@ -117,12 +117,13 @@ func newCheckResult(
 // and compile errors. Result of check is sent via a callback in this format
 // {"warning": <string>, "lines": {<string>: [<string>]}}
 func checkWrapper() js.Func {
-	opts := ugo.DefaultCompilerOptions
-	opts.ModuleMap = ugo.NewModuleMap().
-		AddBuiltinModule("time", ugotime.Module).
-		AddBuiltinModule("strings", ugostrings.Module).
-		AddBuiltinModule("fmt", ugofmt.Module).
-		AddBuiltinModule("json", ugojson.Module)
+	opts := ugo.CompilerOptions{
+		ModuleMap: ugo.NewModuleMap().
+			AddBuiltinModule("time", ugotime.Module).
+			AddBuiltinModule("strings", ugostrings.Module).
+			AddBuiltinModule("fmt", ugofmt.Module).
+			AddBuiltinModule("json", ugojson.Module),
+	}
 
 	return js.FuncOf(func(this js.Value, args []js.Value) (value interface{}) {
 		if len(args) != 2 {

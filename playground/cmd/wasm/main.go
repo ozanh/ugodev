@@ -12,13 +12,13 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/ozanh/ugo"
-	"github.com/ozanh/ugodev/patcher"
-
 	ugofmt "github.com/ozanh/ugo/stdlib/fmt"
 	ugojson "github.com/ozanh/ugo/stdlib/json"
 	ugostrings "github.com/ozanh/ugo/stdlib/strings"
 	ugotime "github.com/ozanh/ugo/stdlib/time"
+
+	"github.com/ozanh/ugo"
+	"github.com/ozanh/ugodev/patcher"
 )
 
 const maxExecDuration = 10 * time.Second
@@ -75,14 +75,13 @@ func newResult(
 }
 
 func runWrapper() js.Func {
-	mm := ugo.NewModuleMap().
-		AddBuiltinModule("time", ugotime.Module).
-		AddBuiltinModule("strings", ugostrings.Module).
-		AddBuiltinModule("fmt", ugofmt.Module).
-		AddBuiltinModule("json", ugojson.Module)
-
-	opts := ugo.DefaultCompilerOptions
-	opts.ModuleMap = mm
+	opts := ugo.CompilerOptions{
+		ModuleMap: ugo.NewModuleMap().
+			AddBuiltinModule("time", ugotime.Module).
+			AddBuiltinModule("strings", ugostrings.Module).
+			AddBuiltinModule("fmt", ugofmt.Module).
+			AddBuiltinModule("json", ugojson.Module),
+	}
 
 	return js.FuncOf(func(this js.Value, args []js.Value) (value interface{}) {
 		mt := metrics{}

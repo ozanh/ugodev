@@ -5,6 +5,7 @@ MAKEFLAGS += --warn-undefined-variables
 
 ENV_FILE=.env.local
 
+GO_VERSION=$(shell go env GOVERSION)
 UGO_PATH=$(shell go list -m -f {{.Dir}} github.com/ozanh/ugo)
 UGO_VERSION=$(shell go list -m -f {{.Version}} github.com/ozanh/ugo)
 
@@ -15,63 +16,51 @@ GOLDFLAGS=-s -w
 BUILD_TIME=$(shell date -u +'%Y-%m-%d_%T')
 JS_WASM_EXEC="$(shell go env GOROOT)/misc/wasm/go_js_wasm_exec"
 
-VUE_CLI_SERVICE=./node_modules/.bin/vue-cli-service
-
 .PHONY: all
 all: build test-all
 
 .PHONY: build
 build: production
-	$(VUE_CLI_SERVICE) build
+	yarn build
 
 .PHONY: serve
 serve: development
-	$(VUE_CLI_SERVICE) serve
+	yarn dev
 
 .PHONY: test-all
 test-all: lint test
-	$(VUE_CLI_SERVICE) test:unit
 
 .PHONY: lint
 lint:
-	$(VUE_CLI_SERVICE) lint --fix
 
 .PHONY: install
 install: ugo.wasm wasm_exec.js
 	test -f ../LICENSE
 	test -f "$(UGO_PATH)/LICENSE.golang"
 	test -f "$(UGO_PATH)/LICENSE.tengo"
-	printf "VUE_APP_WASM_FILE=ugo.wasm\n"\
-	"VUE_APP_UGO_VERSION=$(UGO_VERSION)\n"\
-	"VUE_APP_BUILD_TIME=$(BUILD_TIME)\n"\
-	"VUE_APP_LICENSE=../LICENSE\n"\
-	"VUE_APP_GO_LICENSE=$(UGO_PATH)/LICENSE.golang\n"\
-	"VUE_APP_TENGO_LICENSE=$(UGO_PATH)/LICENSE.tengo\n" > $(ENV_FILE)
+	printf "VITE_GO_VERSION=$(GO_VERSION)\n"\
+	"VITE_UGO_VERSION=$(UGO_VERSION)\n"\
+	"VITE_BUILD_TIME=$(BUILD_TIME)\n"\
+	"VITE_GO_LICENSE=\"$(UGO_PATH)/LICENSE.golang\"\n"\
+	"VITE_TENGO_LICENSE=\"$(UGO_PATH)/LICENSE.tengo\"\n" > $(ENV_FILE)
 
-.PHONY: append-wasm-exec
-append-wasm-exec:
-	echo "VUE_APP_WASM_EXEC_FILE=wasm_exec.js" >> $(ENV_FILE)
-
-.PHONY: wasm_exec.js
 wasm_exec.js: # copy wasm_exec.js to current working dir
 	cp "$(shell go env GOROOT)/misc/wasm/wasm_exec.js" ./wasm_exec.js
-	cp ./wasm_exec.js ./wasm_exec.$$(md5sum ./wasm_exec.js | cut -c1-8).js
 
 ugo.wasm: # create ugo.wasm file in current working dir
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="$(GOLDFLAGS)" -o ./ugo.wasm \
     	github.com/ozanh/ugodev/playground/cmd/wasm
 
 .PHONY: development
-development: clean install append-wasm-exec
+development: clean install
 	mv $(ENV_FILE) .env.$@.local
 
 .PHONY: production
 production: distclean install
-	echo "VUE_APP_WASM_EXEC_FILE=$$(ls wasm_exec.*.js)" >> $(ENV_FILE)
 	mv $(ENV_FILE) .env.$@.local
 
 .PHONY: test
-test: clean install append-wasm-exec
+test: clean install
 	mv $(ENV_FILE) .env.$@.local
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go test -cover -exec="$(JS_WASM_EXEC)" \
         github.com/ozanh/ugo/...
@@ -80,7 +69,7 @@ test: clean install append-wasm-exec
 
 .PHONY: clean
 clean:
-	rm -rf ./.env.local ./.env.*.local ./wasm_exec.js ./wasm_exec.*.js ./ugo.wasm
+	rm -rf ./.env.local ./.env.*.local ./wasm_exec.js ./ugo.wasm ./ThirdPartyNotices.txt
 
 .PHONY: distclean
 distclean: clean

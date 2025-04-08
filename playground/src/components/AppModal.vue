@@ -1,26 +1,13 @@
 <template>
   <transition name="fade">
-    <div
-      v-if="showModal"
-      class="modal"
-    >
-      <div
-        class="modal__backdrop"
-        @click="closeModal()"
-      />
+    <div v-if="showModal" class="modal">
+      <div class="modal__backdrop" @click="closeModal()" />
 
       <div class="modal__dialog">
         <div class="modal__header">
           <slot name="header" />
-          <button
-            type="button"
-            class="modal__close"
-            @click="closeModal()"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 352 512"
-            >
+          <button type="button" class="modal__close" @click="closeModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512">
               <path
                 fill="currentColor"
                 d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
@@ -30,15 +17,11 @@
         </div>
 
         <div class="modal__body">
-          <slot name="body">
-            Default Body
-          </slot>
+          <slot name="body"> Default Body </slot>
         </div>
 
         <div class="modal__footer">
-          <slot name="footer">
-            Default Footer
-          </slot>
+          <slot name="footer"> Default Footer </slot>
         </div>
       </div>
     </div>
@@ -47,8 +30,7 @@
 
 <script>
 export default {
-  // eslint-disable-next-line
-  name: 'Modal',
+  name: 'AppModal',
   props: {
     showModal: {
       type: Boolean,
@@ -56,11 +38,11 @@ export default {
     }
   },
   methods: {
-    closeModal () {
+    closeModal() {
       this.$emit('update:showModal', false)
       document.querySelector('body').classList.remove('overflow-hidden')
     },
-    openModal () {
+    openModal() {
       this.$emit('update:showModal', true)
       document.querySelector('body').classList.add('overflow-hidden')
     }

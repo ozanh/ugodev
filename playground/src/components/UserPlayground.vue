@@ -6,42 +6,26 @@
           <strong>{{ msg }}</strong>
         </div>
         <div class="head-buttons">
-          <button
-            id="run-button"
-            :disabled="loading"
-            class="button"
-            @click="onRun"
-          >
+          <button id="run-button" :disabled="loading" class="button" @click="onRun">
             Run
             <span class="key-press hidden-sm">Ctrl+↵</span>
           </button>
-          <button
-            id="about-button"
-            class="button"
-            @click="showAboutModal = true"
-          >
-            About
-          </button>
+          <button id="about-button" class="button" @click="showAboutModal = true">About</button>
           <div class="loader-wrapper">
-            <div
-              v-show="loading"
-              class="loader"
-            />
+            <div v-show="loading" class="loader" />
           </div>
         </div>
         <div class="head-gh hidden-sm">
           <a
             href="https://github.com/ozanh/ugo"
-            data-size="large"
-            class="github-button"
+            title="Fork ozanh/ugo on GitHub"
             aria-label="Fork ozanh/ugo on GitHub"
+            target="_blank"
           >
-            Fork
+            <button class="button">Fork</button>
           </a>
         </div>
-        <div class="copyright">
-          Copyright © 2020-2023 Ozan Hacıbekiroğlu
-        </div>
+        <div class="copyright">Copyright © 2020-2025 Ozan Hacıbekiroğlu</div>
       </div>
       <div class="body-container">
         <prism-editor
@@ -53,148 +37,93 @@
           @click="onEditorClick"
         />
         <div class="result">
-          <div
-            v-if="result && result.error != ''"
-            class="result-error"
-          >
+          <div v-if="result && result.error != ''" class="result-error">
             <pre>{{ result.error }}</pre>
           </div>
-          <div
-            v-if="result && result.stdout != ''"
-            class="result-stdout"
-          >
+          <div v-if="result && result.stdout != ''" class="result-stdout">
             <pre>{{ result.stdout }}</pre>
           </div>
-          <div
-            v-if="result && result.value!=''"
-            class="result-value"
-          >
+          <div v-if="result && result.value != ''" class="result-value">
             <strong>Return Value as JSON:</strong>
             <pre v-text="valueToJSON(result.value)" />
           </div>
         </div>
       </div>
       <div class="footer">
-        <div
-          v-if="result && result.metrics"
-          class="metrics"
-        >
-          <span>
-            Compile:{{ result.metrics.compile }}
-          </span>
-          <span>
-            Exec:{{ result.metrics.exec }}
-          </span>
-          <span>
-            Total:{{ result.metrics.elapsed }}
-          </span>
+        <div v-if="result && result.metrics" class="metrics">
+          <span> Compile:{{ result.metrics.compile }} </span>
+          <span> Exec:{{ result.metrics.exec }} </span>
+          <span> Total:{{ result.metrics.elapsed }} </span>
         </div>
       </div>
     </div>
     <teleport to="body">
-      <modal
-        :show-modal="showAboutModal"
-        @update:show-modal="showAboutModal = $event"
-      >
+      <app-modal :show-modal="showAboutModal" @update:show-modal="showAboutModal = $event">
         <template #header>
           <h1>About</h1>
         </template>
 
         <template #body>
           <p>
-            uGO Playground is a single page application to test uGO scripts in the browser.<br>
-            Thanks to Go's WebAssembly support, uGO and stdlib modules are compiled for WebAssembly.<br>
-            Note that native performance of uGO is much faster than WebAssembly port.<br><br>
-            <a
-              :href="'/'+license"
-              target="_blank"
-            >LICENSE
-            </a><br>
-            <a
-              :href="'/'+thirdParty"
-              target="_blank"
-              rel="nofollow"
-            >Third Party Notices
-            </a>
-            <br><br>
-            Playground Version: {{ playgroundVersion }}<br>
-            uGO Version: {{ uGOVersion }}<br>
-            Build Time: {{ buildTime }}<br><br>
-            <a
-              href="https://github.com/ozanh/ugo"
-              target="_blank"
-            >uGO Script Language</a><br>
-            <a
-              href="https://github.com/ozanh/ugodev/tree/main/playground"
-              target="_blank"
-            >uGO Playground</a><br>
-            Copyright © 2020-2023 Ozan Hacıbekiroğlu
+            uGO Playground is a single page application to test uGO scripts in the browser.<br />
+            Thanks to Go's WebAssembly support, uGO and stdlib modules are compiled for
+            WebAssembly.<br />
+            Note that native performance of uGO is much faster than WebAssembly port.<br /><br />
+            <a :href="license" target="_blank">LICENSE </a><br />
+            <a :href="thirdParty" target="_blank">Third Party Notices </a>
+            <br /><br />
+            Playground Version: {{ playgroundVersion }}<br />
+            Go Version: {{ goVersion }}<br />
+            uGO Version: {{ uGOVersion }}<br />
+            Build Time: {{ buildTime }}<br /><br />
+            <a href="https://github.com/ozanh/ugo" target="_blank">uGO Script Language</a><br />
+            <a href="https://github.com/ozanh/ugodev/tree/main/playground" target="_blank"
+              >uGO Playground</a
+            ><br />
+            Copyright © 2020-2025 Ozan Hacıbekiroğlu
           </p>
         </template>
 
         <template #footer>
-          <button
-            class="button"
-            @click="showAboutModal = false"
-          >
-            Close
-          </button>
+          <button class="button" @click="showAboutModal = false">Close</button>
         </template>
-      </modal>
-      <modal
-        :show-modal="showWASMErrorModal"
-        @update:show-modal="showWASMErrorModal = $event"
-      >
+      </app-modal>
+      <app-modal :show-modal="showWASMErrorModal" @update:show-modal="showWASMErrorModal = $event">
         <template #header>
           <h1>WebAssembly Error</h1>
         </template>
         <template #body>
-          <br>
+          <br />
         </template>
         <template #footer>
-          <button
-            class="button"
-            @click="showWASMErrorModal = false"
-          >
-            Close
-          </button>
+          <button class="button" @click="showWASMErrorModal = false">Close</button>
         </template>
-      </modal>
+      </app-modal>
     </teleport>
   </div>
 </template>
 
 <script>
-// import required css files
-import '../assets/css/button.css'
-import '../assets/css/loader.css'
-
-// import modal component
-import Modal from './Modal'
-
-// import Prism Editor and vue component
+import { ref } from 'vue'
 import { PrismEditor } from 'vue-prism-editor'
-import 'vue-prism-editor/dist/prismeditor.min.css'
 
-// import highlighting library (you can use any library you want just return html string)
 import { highlight, languages } from 'prismjs/components/prism-core'
 import 'prismjs/components/prism-clike'
 import 'prismjs/components/prism-ugo'
-import 'prismjs/themes/prism-okaidia.css' // import syntax highlighting styles
 
 import miniToastr from 'mini-toastr'
-import { wrap, proxy } from 'comlink'
+import * as Comlink from 'comlink'
 
+import AppModal from './AppModal'
 import { debounce } from '../lib/utils'
-import code from '../../cmd/wasm/testdata/sample.ugo'
-import Worker from '../wasm.worker'
+import ugoSampleCode from '@/../cmd/wasm/testdata/sample.ugo?raw'
+import Worker from '@/wasm.worker?worker'
 
 export default {
-  // eslint-disable-next-line
-  name: 'Playground',
+  name: 'UserPlayground',
   components: {
     PrismEditor,
-    Modal
+    AppModal
   },
   props: {
     msg: {
@@ -206,33 +135,54 @@ export default {
       default: true
     }
   },
-  data: () => ({
-    playgroundVersion: process.env.VUE_APP_PLAYGROUND_VERSION,
-    uGOVersion: process.env.VUE_APP_UGO_VERSION,
-    buildTime: process.env.VUE_APP_BUILD_TIME,
-    license: process.env.VUE_APP_LICENSE_PATH,
-    thirdParty: process.env.VUE_APP_THIRD_PARTY_PATH,
-    showAboutModal: false,
-    showWASMErrorModal: false,
-    code,
-    linesMsgs: {},
-    loading: true,
-    result: null,
-    edited: false
-  }),
+  setup() {
+    const playgroundVersion = import.meta.env.VITE_PLAYGROUND_VERSION
+    const goVersion = import.meta.env.VITE_GO_VERSION
+    const uGOVersion = import.meta.env.VITE_UGO_VERSION
+    const buildTime = import.meta.env.VITE_BUILD_TIME
+    const license = '/assets/LICENSE.txt'
+    const thirdParty = '/assets/ThirdPartyNotices.txt'
+
+    const showAboutModal = ref(false)
+    const showWASMErrorModal = ref(false)
+    const code = ref(ugoSampleCode)
+    const linesMsgs = ref({})
+    const loading = ref(true)
+    const result = ref(null)
+    const edited = ref(false)
+
+    return {
+      playgroundVersion,
+      goVersion,
+      uGOVersion,
+      buildTime,
+      license,
+      thirdParty,
+
+      showAboutModal,
+      showWASMErrorModal,
+      code,
+      linesMsgs,
+      loading,
+      result,
+      edited
+    }
+  },
   watch: {
-    code () {
-      !this.loading && !!this.code && this.checkCode()
+    code() {
+      if (!this.loading && this.code && this.checkCode) {
+        this.checkCode()
+      }
     }
   },
-  created () {
+  created() {
     if (this.checkWASM) {
-      this.worker = wrap(new Worker())
+      this.worker = Comlink.wrap(new Worker())
     }
   },
-  mounted () {
-    if (typeof global.window !== 'undefined') {
-      const unwatch = this.$watch('edited', (newVal) => {
+  mounted() {
+    if (typeof globalThis.window !== 'undefined') {
+      const unwatch = this.$watch('edited', newVal => {
         if (newVal) {
           window.addEventListener('beforeunload', function (e) {
             e.preventDefault()
@@ -243,7 +193,7 @@ export default {
       })
       const ln = document.querySelector('.prism-editor__line-numbers')
       if (ln) {
-        ln.addEventListener('click', (e) => {
+        ln.addEventListener('click', e => {
           if (!e.target.classList.contains('line-number-red')) return
           const msgs = this.linesMsgs[e.target.innerText] || []
           if (!Array.isArray(msgs)) return
@@ -257,10 +207,10 @@ export default {
         })
       }
     }
-    if (typeof global.document !== 'undefined') {
+    if (typeof globalThis.document !== 'undefined') {
       const pg = document.querySelector('.playground-editor')
       if (pg) {
-        pg.addEventListener('keyup', (e) => {
+        pg.addEventListener('keyup', e => {
           if (e.ctrlKey && e.keyCode === 13) this.onRun()
         })
       }
@@ -273,7 +223,7 @@ export default {
       if (ok) {
         this.loading = false
         this.checkCode = debounce(() => {
-          this.worker.checkUGO(proxy(this), this.code.toString())
+          this.worker.checkUGO(Comlink.proxy(this), this.code.toString())
         }, 1000)
       } else {
         counter++
@@ -288,40 +238,40 @@ export default {
     setTimeout(f, 250)
   },
   methods: {
-    highlighter (code) {
+    highlighter(code) {
       return highlight(code, languages.ugo)
     },
-    onRun () {
+    onRun() {
       if (this.loading) return
       this.result = null
       this.loading = true
       try {
-        this.worker.runUGO(proxy(this), this.code.toString())
+        this.worker.runUGO(Comlink.proxy(this), this.code.toString())
       } catch (err) {
         console.log(err)
         this.result = { error: err.toString() }
         this.loading = false
       }
     },
-    resultCallback (msg) {
+    resultCallback(msg) {
       this.loading = false
       this.result = msg
     },
-    valueToJSON (value) {
+    valueToJSON(value) {
       try {
         return JSON.stringify(JSON.parse(value), null, 2)
       } catch (err) {
         return `JSON Error: ${err.toString()}`
       }
     },
-    onEditorClick () {
+    onEditorClick() {
       const elem = document.querySelector('.prism-editor__textarea')
       if (elem) {
         elem.focus()
         elem.click()
       }
     },
-    checkCallback (result) {
+    checkCallback(result) {
       if (typeof result !== 'undefined') {
         if (result.warning) {
           console.log('check warning:', result.warning)
@@ -331,11 +281,11 @@ export default {
       }
       this.highlightLine({})
     },
-    highlightLine (linesMsgs) {
+    highlightLine(linesMsgs) {
       this.linesMsgs = linesMsgs
       const lines = document.querySelectorAll('.prism-editor__line-number')
       if (!lines) return
-      lines.forEach((el) => {
+      lines.forEach(el => {
         if (el.innerText in linesMsgs) el.classList.add('line-number-red')
         else el.classList.remove('line-number-red')
       })
@@ -423,7 +373,13 @@ export default {
 .playground-editor {
   background: #2d2d2d;
   color: #ccc;
-  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-family:
+    Fira code,
+    Fira Mono,
+    Consolas,
+    Menlo,
+    Courier,
+    monospace;
   font-size: 11pt;
   line-height: 1.2;
   padding: 0px;

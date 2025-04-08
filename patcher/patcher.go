@@ -21,7 +21,7 @@ type patchFunc = func(*instsIterator) (op byte, insts []byte)
 // calls which takes place when number of calls reaches to callCount value.
 // This patch should be used in single threaded application e.g. WebAssembly.
 // If error is returned, given ugo.Bytecode must be discarded due to invalid patching.
-func Gosched(bc *ugo.Bytecode, callCount int64) (int, error) {
+func Gosched(bc *ugo.Bytecode, callCount uint32) (int, error) {
 	// Generate following instructions to insert before backward jumps and
 	// function start points.
 	/*
@@ -79,24 +79,31 @@ func Gosched(bc *ugo.Bytecode, callCount int64) (int, error) {
 
 type goschedFunc struct {
 	ugo.ObjectImpl
-	counter   int64
-	callCount int64
+	counter   atomic.Uint32
+	callCount uint32
 }
+
+var _ ugo.ExCallerObject = (*goschedFunc)(nil)
 
 func (g *goschedFunc) String() string   { return "<gosched>" }
 func (g *goschedFunc) TypeName() string { return g.String() }
 func (g *goschedFunc) CanCall() bool    { return true }
 
 func (g *goschedFunc) Call(args ...ugo.Object) (ugo.Object, error) {
-	if atomic.AddInt64(&g.counter, 1) >= g.callCount {
-		atomic.StoreInt64(&g.counter, 0)
-		runtime.Gosched()
+	return g.CallEx(ugo.Call{})
+}
+
+func (g *goschedFunc) CallEx(_ ugo.Call) (ugo.Object, error) {
+	if v := g.counter.Add(1); v >= g.callCount {
+		if g.counter.CompareAndSwap(v, 0) {
+			runtime.Gosched()
+		}
 	}
 	return ugo.Undefined, nil
 }
 
-func (g *goschedFunc) NumCalls() int64 {
-	return atomic.LoadInt64(&g.counter)
+func (g *goschedFunc) NumCalls() uint32 {
+	return g.counter.Load()
 }
 
 type bytecodePatcher struct {
@@ -279,10 +286,7 @@ func (it *instsIterator) Next() bool {
 		it.err = fmt.Errorf("invalid opcode %d at %d", it.opcode, it.pos)
 		return false
 	}
-	it.offset = 0
-	for _, width := range ugo.OpcodeOperands[it.opcode] {
-		it.offset += width
-	}
+	it.offset = opWidths[it.opcode]
 	it.pos += it.offset + 1
 	return true
 }
@@ -350,10 +354,20 @@ func (sm *sourceMapper) InsertAt(pos, size int) {
 }
 
 func (sm *sourceMapper) MakeSourceMap() map[int]int {
-	// put length for map creation, it is faster
 	m := make(map[int]int, len(sm.keys))
 	for i, v := range sm.keys {
 		m[v] = sm.values[i]
 	}
 	return m
+}
+
+var opWidths = getOpWidths()
+
+func getOpWidths() (opWidths [len(ugo.OpcodeOperands)]int) {
+	for op := range ugo.OpcodeOperands {
+		for _, w := range ugo.OpcodeOperands[op] {
+			opWidths[op] += w
+		}
+	}
+	return opWidths
 }
