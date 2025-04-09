@@ -13,11 +13,11 @@ import (
 	. "github.com/ozanh/ugo"
 )
 
-func TestGosched(t *testing.T) {
+func TestPatchForGosched(t *testing.T) {
 	opts := CompilerOptions{}
 	expectCompile(t, ``, opts, func(bc *Bytecode) {
 		expected := copyBytecode(bc)
-		n, err := patcher.Gosched(expected, 100)
+		n, err := patcher.PatchForGosched(expected, 100)
 		require.NoError(t, err)
 		require.Equal(t, 1, n)
 		expected.Constants = expected.Constants[:len(expected.Constants)-1]
@@ -65,7 +65,7 @@ func TestGosched(t *testing.T) {
 			noCmpCompFunc: true,
 			noCmpConsts:   true,
 			numInserts:    2,
-			callCount:     11,
+			threshold:     11,
 			numCalls:      10,
 		})
 	})
@@ -76,8 +76,8 @@ func TestGosched(t *testing.T) {
 			noCmpCompFunc: true,
 			noCmpConsts:   true,
 			numInserts:    2,
-			callCount:     9,
-			numCalls:      1,
+			threshold:     9,
+			numCalls:      10,
 		})
 	})
 	expectCompile(t, `f := func() {}; f()`, opts, func(bc *Bytecode) {
@@ -130,7 +130,7 @@ func TestGosched(t *testing.T) {
 	expectCompile(t, ``, opts, func(bc *Bytecode) {
 		expected := copyBytecode(bc)
 		expected.Main.SourceMap = map[int]int{7: 0}
-		n, err := patcher.Gosched(bc, 100)
+		n, err := patcher.PatchForGosched(bc, 100)
 		require.NoError(t, err)
 		require.Equal(t, 1, n)
 		expected.Main.Instructions = concatInsts(
@@ -154,7 +154,7 @@ func TestGosched(t *testing.T) {
 	}
 	`, opts, func(bc *Bytecode) {
 		orig := copyBytecode(bc)
-		n, err := patcher.Gosched(bc, 100)
+		n, err := patcher.PatchForGosched(bc, 100)
 		require.NoError(t, err)
 		require.Equal(t, 2, n)
 		expected := `
@@ -207,7 +207,7 @@ SourceMap:map[7:8 10:3 12:11 21:25 23:19 25:30 26:11 28:11 33:30 34:30 36:48 38:
 	}
 	`, opts, func(bc *Bytecode) {
 		orig := copyBytecode(bc)
-		n, err := patcher.Gosched(bc, 100)
+		n, err := patcher.PatchForGosched(bc, 100)
 		require.NoError(t, err)
 		require.Equal(t, 1, n)
 		expected := `
@@ -275,8 +275,8 @@ type expectedPatch struct {
 	noCmpConsts   bool
 	noCmpCompFunc bool
 	numInserts    int
-	callCount     uint32
-	numCalls      uint32
+	threshold     uint32
+	numCalls      uint64
 }
 
 func expectCompile(t *testing.T, s string, opts CompilerOptions, fn func(*Bytecode)) {
@@ -294,35 +294,36 @@ func expectPatch(t *testing.T, actual *Bytecode, expected expectedPatch) {
 				expected.bc.String(), actual.String())
 		}
 	}()
+
 	require.NotSame(t, expected.bc, actual, "do not use same object to test")
-	cc := uint32(100)
-	if expected.callCount > 0 {
-		cc = expected.callCount
+
+	threshold := uint32(100)
+	if expected.threshold > 0 {
+		threshold = expected.threshold
 	}
-	numInserts, err := patcher.Gosched(actual, cc)
+
+	numInserts, err := patcher.PatchForGosched(actual, threshold)
 	require.NoError(t, err, "Gosched error")
-	require.Equal(t, expected.numInserts, numInserts,
-		"number of inserts not equal")
+	require.Equal(t, expected.numInserts, numInserts, "number of inserts not equal")
+
 	obj := actual.Constants[len(actual.Constants)-1]
 	require.Equal(t, "<gosched>", obj.String(), "got unexpected String()")
 	require.Equal(t, "<gosched>", obj.TypeName(), "got unexpected TypeName()")
-	fn := obj.(interface {
-		NumCalls() uint32
-	})
+
 	if !expected.noExec {
 		ret, err := NewVM(actual).Run(nil)
 		require.NoError(t, err, "VM error")
 		require.Equal(t, Undefined, ret, "tests must return undefined")
-		require.Equal(t, expected.numCalls, fn.NumCalls(),
-			"number of calls not equal")
+
+		numCalls := obj.(patcher.NumCallsGetter).NumCalls()
+		require.Equal(t, expected.numCalls, numCalls, "number of calls not equal")
 	}
 
 	require.Equal(t, expected.bc.FileSet, actual.FileSet, "FileSets not equal")
-	require.Equal(t, expected.bc.NumModules, actual.NumModules,
-		"number of modules not equal")
+	require.Equal(t, expected.bc.NumModules, actual.NumModules, "number of modules not equal")
+
 	if !expected.noCmpConsts {
-		expectConstantsEqual(t,
-			expected.noCmpConsts, actual.Constants, expected.bc.Constants)
+		expectConstantsEqual(t, expected.noCmpConsts, actual.Constants, expected.bc.Constants)
 	}
 	if !expected.noCmpCompFunc {
 		expectCompiledFunctionsEqual(t, actual.Main, expected.bc.Main)

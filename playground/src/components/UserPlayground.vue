@@ -10,11 +10,27 @@
             Run
             <span class="key-press hidden-sm">Ctrl+↵</span>
           </button>
+
           <button id="about-button" class="button" @click="showAboutModal = true">About</button>
-          <div class="loader-wrapper">
-            <div v-show="loading" class="loader" />
+
+          <div style="min-width: 120px">
+            <button
+              title="Cancel running script"
+              id="cancel-button"
+              v-show="delayedLoading"
+              :disabled="cancelInProcess"
+              class="button"
+              @click="onCancel"
+            >
+              <span v-if="cancelInProcess">Canceling</span>
+              <span v-else>x Cancel</span>
+            </button>
+          </div>
+          <div class="loader-wrapper" style="padding-right: 4px">
+            <div v-show="delayedLoading" class="loader" />
           </div>
         </div>
+        <div class="copyright">Copyright © 2020-2025 Ozan Hacıbekiroğlu</div>
         <div class="head-gh hidden-sm">
           <a
             href="https://github.com/ozanh/ugo"
@@ -25,7 +41,6 @@
             <button class="button">Fork</button>
           </a>
         </div>
-        <div class="copyright">Copyright © 2020-2025 Ozan Hacıbekiroğlu</div>
       </div>
       <div class="body-container">
         <prism-editor
@@ -147,9 +162,11 @@ export default {
     const showWASMErrorModal = ref(false)
     const code = ref(ugoSampleCode)
     const linesMsgs = ref({})
-    const loading = ref(true)
+    const loading = ref(false)
+    const delayedLoading = ref(false)
     const result = ref(null)
     const edited = ref(false)
+    const cancelInProcess = ref(false)
 
     return {
       playgroundVersion,
@@ -164,14 +181,25 @@ export default {
       code,
       linesMsgs,
       loading,
+      delayedLoading,
       result,
-      edited
+      edited,
+      cancelInProcess
     }
   },
   watch: {
     code() {
       if (!this.loading && this.code && this.checkCode) {
         this.checkCode()
+      }
+    },
+    loading(newVal) {
+      if (newVal) {
+        setTimeout(() => {
+          this.delayedLoading = this.loading
+        }, 1000)
+      } else {
+        this.delayedLoading = false
       }
     }
   },
@@ -217,7 +245,9 @@ export default {
     }
 
     if (!this.checkWASM) return
+
     let counter = 0
+
     const f = async () => {
       const ok = await this.worker.isLoaded()
       if (ok) {
@@ -243,14 +273,28 @@ export default {
     },
     onRun() {
       if (this.loading) return
+
       this.result = null
       this.loading = true
+
       try {
         this.worker.runUGO(Comlink.proxy(this), this.code.toString())
       } catch (err) {
         console.log(err)
         this.result = { error: err.toString() }
         this.loading = false
+      }
+    },
+    async onCancel() {
+      this.cancelInProcess = true
+
+      try {
+        const canceled = await this.worker.cancelUGO()
+        console.log('Cancel result:', canceled)
+      } catch (err) {
+        console.log('Cancel error:', err)
+      } finally {
+        this.cancelInProcess = false
       }
     },
     resultCallback(msg) {
@@ -293,6 +337,7 @@ export default {
   }
 }
 </script>
+
 <style lang="scss">
 .line-number-red {
   background-color: red;
@@ -463,6 +508,8 @@ export default {
 @media (min-width: 900px) {
   .copyright {
     flex: 1 0 auto;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 }
 </style>

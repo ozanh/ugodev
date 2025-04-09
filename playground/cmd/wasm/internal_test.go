@@ -4,7 +4,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 	"syscall/js"
 	"testing"
@@ -19,7 +19,7 @@ func setupRun(t *testing.T) <-chan []js.Value {
 		t.Fatal("_resultCallback already set")
 	}
 	cbArgs := make(chan []js.Value, 1)
-	cb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	cb := js.FuncOf(func(this js.Value, args []js.Value) any {
 		cbArgs <- args
 		return nil
 	})
@@ -29,7 +29,7 @@ func setupRun(t *testing.T) <-chan []js.Value {
 
 	global.Call("eval", `var obj = { resultCallback: _resultCallback };`)
 
-	w := runWrapper()
+	w := makeRunFunc()
 	t.Cleanup(w.Release)
 	global.Set("runUGO", w)
 	t.Cleanup(func() { global.Delete("runUGO") })
@@ -44,7 +44,7 @@ func setupCheck(t *testing.T) <-chan []js.Value {
 		t.Fatal("_checkCallback already set")
 	}
 	cbArgs := make(chan []js.Value, 1)
-	cb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	cb := js.FuncOf(func(this js.Value, args []js.Value) any {
 		cbArgs <- args
 		return nil
 	})
@@ -54,7 +54,7 @@ func setupCheck(t *testing.T) <-chan []js.Value {
 
 	global.Call("eval", `var obj = { checkCallback: _checkCallback };`)
 
-	w := checkWrapper()
+	w := makeCheckFunc()
 	t.Cleanup(w.Release)
 	global.Set("checkUGO", w)
 	t.Cleanup(func() { global.Delete("checkUGO") })
@@ -273,7 +273,7 @@ func TestUGOCheckOptimizerError(t *testing.T) {
 
 func TestSample(t *testing.T) {
 	global := js.Global()
-	code, err := ioutil.ReadFile("testdata/sample.ugo")
+	code, err := os.ReadFile("testdata/sample.ugo")
 	if err != nil {
 		t.Fatal(err)
 	}

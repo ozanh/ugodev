@@ -1,6 +1,6 @@
 import * as Comlink from 'comlink'
 
-console.log('importing wasm worker')
+console.log('init wasm worker')
 
 if (!WebAssembly.instantiateStreaming) {
   WebAssembly.instantiateStreaming = async (resp, importObject) => {
@@ -19,26 +19,52 @@ WebAssembly.instantiateStreaming(fetch(mod.default), go.importObject).then(async
   await go.run(result.instance)
 })
 
-export const ugo = {
+const ugo = {
   isLoaded() {
-    return typeof self.runUGO !== 'undefined'
+    return Boolean(self.runUGO)
   },
   runUGO(obj, script) {
     try {
-      self.runUGO(obj, script)
+      const ret = self.runUGO(obj, script)
+      if (ret && typeof ret === 'object') {
+        if (ret.error) {
+          throw new Error(`Internal error: ${ret.error}`)
+        } else {
+          throw new Error(`Unexpected result from runUGO wasm: ${ret}`)
+        }
+      }
     } catch (err) {
-      if (typeof obj.resultCallback !== 'undefined') {
+      if (obj.resultCallback) {
         obj.resultCallback({ error: err.toString() })
+      } else {
+        console.error(`runUGO error: ${err}`)
       }
     }
   },
   checkUGO(obj, script) {
     try {
-      self.checkUGO(obj, script)
-    } catch (err) {
-      if (typeof obj.checkCallback !== 'undefined') {
-        obj.checkCallback({ warning: err.toString() })
+      const ret = self.checkUGO(obj, script)
+      if (ret && typeof ret === 'object') {
+        if (ret.error) {
+          throw new Error(`Internal error: ${ret.error}`)
+        } else {
+          throw new Error(`Unexpected result from checkUGO wasm: ${ret}`)
+        }
       }
+    } catch (err) {
+      if (obj.checkCallback) {
+        obj.checkCallback({ warning: err.toString() })
+      } else {
+        console.error(`checkUGO error: ${err}`)
+      }
+    }
+  },
+  cancelUGO() {
+    try {
+      return self.cancelUGO()
+    } catch (err) {
+      console.error(`cancelUGO error: ${err}`)
+      return false
     }
   }
 }

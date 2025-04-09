@@ -19,13 +19,13 @@ import (
 
 // linesErrors returns line numbers and assoc. error messages thrown by parser,
 // optimizer, compiler or VM.
-func linesErrors(err error) map[string]interface{} {
+func linesErrors(err error) map[string]any {
 	m := linesFromError(err)
 	if len(m) > 0 {
 		um := uniqueLinesErrorsString(m)
-		out := make(map[string]interface{}, len(um))
+		out := make(map[string]any, len(um))
 		for k, v := range um {
-			l := make([]interface{}, len(v))
+			l := make([]any, len(v))
 			for i, s := range v {
 				l[i] = s
 			}
@@ -103,20 +103,17 @@ func uniqueErrorStrings(errs []error) []string {
 	return out
 }
 
-func newCheckResult(
-	warning string,
-	linesErrs map[string]interface{},
-) map[string]interface{} {
-	return map[string]interface{}{
+func newCheckResult(warning string, linesErrs map[string]any) map[string]any {
+	return map[string]any{
 		"warning": warning,
 		"lines":   linesErrs,
 	}
 }
 
-// checkWrapper returns a js function to report given script whether has parse
+// makeCheckFunc returns a js function to report given script whether has parse
 // and compile errors. Result of check is sent via a callback in this format
 // {"warning": <string>, "lines": {<string>: [<string>]}}
-func checkWrapper() js.Func {
+func makeCheckFunc() js.Func {
 	opts := ugo.CompilerOptions{
 		ModuleMap: ugo.NewModuleMap().
 			AddBuiltinModule("time", ugotime.Module).
@@ -125,33 +122,51 @@ func checkWrapper() js.Func {
 			AddBuiltinModule("json", ugojson.Module),
 	}
 
-	return js.FuncOf(func(this js.Value, args []js.Value) (value interface{}) {
+	return js.FuncOf(func(this js.Value, args []js.Value) any {
 		if len(args) != 2 {
 			return newCheckResult(ugo.ErrWrongNumArguments.
 				NewError("got =", strconv.Itoa(len(args))).String(), nil)
 		}
 
-		callback := func(v interface{}) {
-			_ = args[0].Call("checkCallback", v)
+		gMutex.Lock()
+		defer gMutex.Unlock()
+
+		if gBusy {
+			return newErrorResult(playgroundBusy)
 		}
+
+		arg0 := args[0]
 		script := args[1].String()
-		if script == "" {
-			callback(newCheckResult("empty script", nil))
-			return nil
-		}
+		callback := func(v any) { _ = arg0.Call("checkCallback", v) }
+
+		gBusy = true
+
 		go func() {
+			defer func() {
+				gMutex.Lock()
+				gBusy = false
+				gMutex.Unlock()
+			}()
+
 			var warning string
-			var result map[string]interface{}
+			var result map[string]any
 			defer func() {
 				if r := recover(); r != nil {
 					warning = fmt.Sprintf("%+v", r)
 				}
 				callback(newCheckResult(warning, result))
 			}()
+
+			if script == "" {
+				warning = "empty script"
+				return
+			}
+
 			_, err := ugo.Compile([]byte(script), opts)
 			if err == nil {
 				return
 			}
+
 			result = linesErrors(err)
 			if result == nil {
 				warning = err.Error()
