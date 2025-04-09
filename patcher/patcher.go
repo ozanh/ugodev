@@ -381,7 +381,8 @@ func (sm *sourceMapper) MakeSourceMap() map[int]int {
 
 var opWidths = getOpWidths()
 
-func getOpWidths() (opWidths [len(ugo.OpcodeOperands)]int) {
+func getOpWidths() (opWidths []int) {
+	opWidths = make([]int, len(ugo.OpcodeOperands))
 	for op := range ugo.OpcodeOperands {
 		for _, w := range ugo.OpcodeOperands[op] {
 			opWidths[op] += w
