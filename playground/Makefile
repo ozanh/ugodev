@@ -64,7 +64,7 @@ test: clean install
 	mv $(ENV_FILE) .env.$@.local
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go test -cover -exec="$(JS_WASM_EXEC)" \
         github.com/ozanh/ugo/...
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go test -cover -exec="$(JS_WASM_EXEC)" \
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go test -v -cover -exec="$(JS_WASM_EXEC)" \
         github.com/ozanh/ugodev/playground/cmd/wasm
 
 .PHONY: clean

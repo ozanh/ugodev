@@ -271,7 +271,8 @@ func main() {
 	run := makeRunFunc()
 	defer run.Release()
 
-	check := makeCheckFunc()
+	noOptimizeCheck := true
+	check := makeCheckFunc(noOptimizeCheck)
 	defer check.Release()
 
 	cancel := makeCancelFunc()

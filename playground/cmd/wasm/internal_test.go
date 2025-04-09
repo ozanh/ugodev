@@ -11,63 +11,16 @@ import (
 	"time"
 )
 
-func setupRun(t *testing.T) <-chan []js.Value {
-	t.Helper()
+func Test_run(t *testing.T) {
 	global := js.Global()
-	v := global.Get("_resultCallback")
-	if v.Type() != js.TypeUndefined {
-		t.Fatal("_resultCallback already set")
-	}
-	cbArgs := make(chan []js.Value, 1)
-	cb := js.FuncOf(func(this js.Value, args []js.Value) any {
-		cbArgs <- args
-		return nil
-	})
-	t.Cleanup(cb.Release)
-	global.Set("_resultCallback", cb)
-	t.Cleanup(func() { global.Delete("_resultCallback") })
 
-	global.Call("eval", `var obj = { resultCallback: _resultCallback };`)
-
-	w := makeRunFunc()
-	t.Cleanup(w.Release)
-	global.Set("runUGO", w)
-	t.Cleanup(func() { global.Delete("runUGO") })
-	return cbArgs
-}
-
-func setupCheck(t *testing.T) <-chan []js.Value {
-	t.Helper()
-	global := js.Global()
-	v := global.Get("_checkCallback")
-	if v.Type() != js.TypeUndefined {
-		t.Fatal("_checkCallback already set")
-	}
-	cbArgs := make(chan []js.Value, 1)
-	cb := js.FuncOf(func(this js.Value, args []js.Value) any {
-		cbArgs <- args
-		return nil
-	})
-	t.Cleanup(cb.Release)
-	global.Set("_checkCallback", cb)
-	t.Cleanup(func() { global.Delete("_checkCallback") })
-
-	global.Call("eval", `var obj = { checkCallback: _checkCallback };`)
-
-	w := makeCheckFunc()
-	t.Cleanup(w.Release)
-	global.Set("checkUGO", w)
-	t.Cleanup(func() { global.Delete("checkUGO") })
-	return cbArgs
-}
-
-func TestUGORun(t *testing.T) {
-	global := js.Global()
 	cbArgs := setupRun(t)
+
 	v := global.Get("runUGO").Invoke(global.Get("obj"), `x:=123;println(123);return x;`)
 	if v.Type() != js.TypeNull {
 		t.Fatalf("runUGO() expected: %v, got: %v", js.Null(), v)
 	}
+
 	select {
 	case args := <-cbArgs:
 		if len(args) != 1 {
@@ -103,9 +56,11 @@ func TestUGORun(t *testing.T) {
 	}
 }
 
-func TestUGOCheck(t *testing.T) {
+func Test_check(t *testing.T) {
 	global := js.Global()
-	cbArgs := setupCheck(t)
+
+	noOptimize := true
+	cbArgs := setupCheck(t, noOptimize)
 
 	// no args return an object with warning
 	v := global.Get("checkUGO").Invoke()
@@ -139,13 +94,17 @@ func TestUGOCheck(t *testing.T) {
 		t.Fatal("callback result timeout")
 	}
 }
-func TestUGOCheckParserError(t *testing.T) {
+func Test_check_parser_error(t *testing.T) {
 	global := js.Global()
-	cbArgs := setupCheck(t)
+
+	noOptimize := true
+	cbArgs := setupCheck(t, noOptimize)
+
 	v := global.Get("checkUGO").Invoke(global.Get("obj"), "var a,\ntry {}")
 	if v.Type() != js.TypeNull {
 		t.Fatalf("checkUGO() expected: %v, got: %v", js.Null(), v)
 	}
+
 	select {
 	case args := <-cbArgs:
 		if len(args) != 1 {
@@ -186,13 +145,17 @@ func TestUGOCheckParserError(t *testing.T) {
 		t.Fatal("callback result timeout")
 	}
 }
-func TestUGOCheckCompilerError(t *testing.T) {
+func Test_check_compiler_error(t *testing.T) {
 	global := js.Global()
-	cbArgs := setupCheck(t)
+
+	noOptimize := true
+	cbArgs := setupCheck(t, noOptimize)
+
 	v := global.Get("checkUGO").Invoke(global.Get("obj"), "x=123")
 	if v.Type() != js.TypeNull {
 		t.Fatalf("checkUGO() expected: %v, got: %v", js.Null(), v)
 	}
+
 	select {
 	case args := <-cbArgs:
 		if len(args) != 1 {
@@ -222,13 +185,17 @@ func TestUGOCheckCompilerError(t *testing.T) {
 	}
 
 }
-func TestUGOCheckOptimizerError(t *testing.T) {
+func Test_check_optimizer_error(t *testing.T) {
 	global := js.Global()
-	cbArgs := setupCheck(t)
+
+	noOptimize := false
+	cbArgs := setupCheck(t, noOptimize)
+
 	v := global.Get("checkUGO").Invoke(global.Get("obj"), "1/0\n1/0")
 	if v.Type() != js.TypeNull {
 		t.Fatalf("checkUGO() expected: %v, got: %v", js.Null(), v)
 	}
+
 	select {
 	case args := <-cbArgs:
 		if len(args) != 1 {
@@ -271,7 +238,7 @@ func TestUGOCheckOptimizerError(t *testing.T) {
 	}
 }
 
-func TestSample(t *testing.T) {
+func Test_sample(t *testing.T) {
 	global := js.Global()
 	code, err := os.ReadFile("testdata/sample.ugo")
 	if err != nil {
@@ -296,4 +263,65 @@ func TestSample(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("callback result timeout")
 	}
+}
+
+func setupRun(t *testing.T) <-chan []js.Value {
+	t.Helper()
+
+	global := js.Global()
+
+	v := global.Get("_resultCallback")
+	if v.Type() != js.TypeUndefined {
+		t.Fatal("_resultCallback already set")
+	}
+
+	cbArgs := make(chan []js.Value, 1)
+	cb := js.FuncOf(func(this js.Value, args []js.Value) any {
+		cbArgs <- args
+		return nil
+	})
+	t.Cleanup(cb.Release)
+
+	global.Set("_resultCallback", cb)
+
+	t.Cleanup(func() { global.Delete("_resultCallback") })
+
+	global.Call("eval", `var obj = { resultCallback: _resultCallback };`)
+
+	w := makeRunFunc()
+	t.Cleanup(w.Release)
+
+	global.Set("runUGO", w)
+
+	t.Cleanup(func() { global.Delete("runUGO") })
+	return cbArgs
+}
+
+func setupCheck(t *testing.T, noOptimize bool) <-chan []js.Value {
+	t.Helper()
+
+	global := js.Global()
+
+	v := global.Get("_checkCallback")
+	if v.Type() != js.TypeUndefined {
+		t.Fatal("_checkCallback already set")
+	}
+
+	cbArgs := make(chan []js.Value, 1)
+	cb := js.FuncOf(func(this js.Value, args []js.Value) any {
+		cbArgs <- args
+		return nil
+	})
+	t.Cleanup(cb.Release)
+
+	global.Set("_checkCallback", cb)
+	t.Cleanup(func() { global.Delete("_checkCallback") })
+
+	global.Call("eval", `var obj = { checkCallback: _checkCallback };`)
+
+	w := makeCheckFunc(noOptimize)
+	t.Cleanup(w.Release)
+	global.Set("checkUGO", w)
+	t.Cleanup(func() { global.Delete("checkUGO") })
+	return cbArgs
 }

@@ -113,14 +113,14 @@ func newCheckResult(warning string, linesErrs map[string]any) map[string]any {
 // makeCheckFunc returns a js function to report given script whether has parse
 // and compile errors. Result of check is sent via a callback in this format
 // {"warning": <string>, "lines": {<string>: [<string>]}}
-func makeCheckFunc() js.Func {
+func makeCheckFunc(noOptimize bool) js.Func {
 	opts := ugo.CompilerOptions{
 		ModuleMap: ugo.NewModuleMap().
 			AddBuiltinModule("time", ugotime.Module).
 			AddBuiltinModule("strings", ugostrings.Module).
 			AddBuiltinModule("fmt", ugofmt.Module).
 			AddBuiltinModule("json", ugojson.Module),
-		NoOptimize: true,
+		NoOptimize: noOptimize,
 	}
 
 	return js.FuncOf(func(this js.Value, args []js.Value) any {
