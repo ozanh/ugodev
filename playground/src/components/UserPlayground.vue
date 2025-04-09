@@ -3,7 +3,7 @@
     <div class="playground">
       <div class="head">
         <div class="playground-text">
-          <strong>{{ msg }}</strong>
+          <strong>{{ playgroundText }}</strong>
         </div>
         <div class="head-buttons">
           <button id="run-button" :disabled="loading" class="button" @click="onRun">
@@ -31,14 +31,28 @@
           </div>
         </div>
         <div class="copyright">Copyright © 2020-2025 Ozan Hacıbekiroğlu</div>
-        <div class="head-gh hidden-sm">
+        <div class="hidden-sm">
           <a
             href="https://github.com/ozanh/ugo"
             title="Fork ozanh/ugo on GitHub"
             aria-label="Fork ozanh/ugo on GitHub"
             target="_blank"
           >
-            <button class="button">Fork</button>
+            <button class="button">
+              <svg
+                fill="none"
+                width="16"
+                height="16"
+                viewBox="0 -4 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill="currentColor"
+                  d="M8 18a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm1.033-3.817A3.001 3.001 0 1 1 7 14.17v-1.047c0-.074.003-.148.008-.221a1 1 0 0 0-.462-.637L3.46 10.42A3 3 0 0 1 2 7.845V5.829a3.001 3.001 0 1 1 2 0v2.016a1 1 0 0 0 .487.858l3.086 1.846a3 3 0 0 1 .443.324 3 3 0 0 1 .444-.324l3.086-1.846a1 1 0 0 0 .487-.858V5.841A3.001 3.001 0 0 1 13 0a3 3 0 0 1 1.033 5.817v2.028a3 3 0 0 1-1.46 2.575l-3.086 1.846a1 1 0 0 0-.462.637c.005.073.008.147.008.22v1.06zM3 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                />
+              </svg>
+              Fork
+            </button>
           </a>
         </div>
       </div>
@@ -129,10 +143,10 @@ import 'prismjs/components/prism-ugo'
 import miniToastr from 'mini-toastr'
 import * as Comlink from 'comlink'
 
-import AppModal from './AppModal'
-import { debounce } from '../lib/utils'
 import ugoSampleCode from '@/../cmd/wasm/testdata/sample.ugo?raw'
+import { debounce } from '@/lib/utils'
 import Worker from '@/wasm.worker?worker'
+import AppModal from './AppModal'
 
 export default {
   name: 'UserPlayground',
@@ -141,16 +155,13 @@ export default {
     AppModal
   },
   props: {
-    msg: {
-      type: String,
-      default: ''
-    },
     checkWASM: {
       type: Boolean,
       default: true
     }
   },
   setup() {
+    const playgroundText = 'uGO Playground'
     const playgroundVersion = import.meta.env.VITE_PLAYGROUND_VERSION
     const goVersion = import.meta.env.VITE_GO_VERSION
     const uGOVersion = import.meta.env.VITE_UGO_VERSION
@@ -169,6 +180,7 @@ export default {
     const cancelInProcess = ref(false)
 
     return {
+      playgroundText,
       playgroundVersion,
       goVersion,
       uGOVersion,
@@ -379,10 +391,6 @@ export default {
   align-items: stretch;
 }
 
-.head-gh {
-  padding-right: 5px;
-}
-
 .key-press {
   opacity: 0.4;
   font-size: 90%;
@@ -490,6 +498,7 @@ export default {
   bottom: 0;
   width: 100%;
   text-align: right;
+  padding-top: 8px;
 }
 
 .metrics {
