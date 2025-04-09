@@ -120,6 +120,7 @@ func makeCheckFunc() js.Func {
 			AddBuiltinModule("strings", ugostrings.Module).
 			AddBuiltinModule("fmt", ugofmt.Module).
 			AddBuiltinModule("json", ugojson.Module),
+		NoOptimize: true,
 	}
 
 	return js.FuncOf(func(this js.Value, args []js.Value) any {
