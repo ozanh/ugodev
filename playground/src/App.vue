@@ -1,19 +1,11 @@
+<script setup>
+import UserPlayground from '@/components/UserPlayground.vue'
+</script>
+
 <template>
-  <div>
-    <Playground msg="The uGO Playground" />
-  </div>
+  <user-playground />
 </template>
 
-<script>
-import Playground from './components/Playground.vue'
-
-export default {
-  name: 'App',
-  components: {
-    Playground
-  }
-}
-</script>
 <style>
 body {
   background-color: #3f3f3f;

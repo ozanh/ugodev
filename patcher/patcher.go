@@ -5,7 +5,8 @@ package patcher
 import (
 	"fmt"
 	"runtime"
-	"sync/atomic"
+	"sync"
+	"time"
 
 	"github.com/ozanh/ugo"
 )
@@ -17,11 +18,12 @@ const (
 
 type patchFunc = func(*instsIterator) (op byte, insts []byte)
 
-// Gosched modifies given ugo.Bytecode to add Go's runtime.Gosched() function
-// calls which takes place when number of calls reaches to callCount value.
-// This patch should be used in single threaded application e.g. WebAssembly.
-// If error is returned, given ugo.Bytecode must be discarded due to invalid patching.
-func Gosched(bc *ugo.Bytecode, callCount int64) (int, error) {
+// PatchForGosched modifies given ugo.Bytecode to add a callable to the given
+// ugo.Bytecode that tries to park the VM goroutine when the number of calls to
+// the callable reaches the given threshold. This patch should be used in single
+// threaded application e.g. WebAssembly. If error is returned, given
+// ugo.Bytecode must be discarded due to invalid patching.
+func PatchForGosched(bc *ugo.Bytecode, callThreshold uint32) (int, error) {
 	// Generate following instructions to insert before backward jumps and
 	// function start points.
 	/*
@@ -29,6 +31,11 @@ func Gosched(bc *ugo.Bytecode, callCount int64) (int, error) {
 		0000 CALL 0 0
 		0000 POP
 	*/
+
+	if callThreshold == 0 {
+		panic("callThreshold must be greater than 0")
+	}
+
 	constIndex := len(bc.Constants)
 	insert := make([]byte, 0, 7)
 	b := make([]byte, 8)
@@ -70,8 +77,10 @@ func Gosched(bc *ugo.Bytecode, callCount int64) (int, error) {
 	if err := bp.patch(); err != nil {
 		return numInserts, err
 	}
+
 	fn := &goschedFunc{
-		callCount: callCount,
+		callThreshold: callThreshold,
+		sleep:         runtime.NumCPU() == 1 || runtime.GOMAXPROCS(0) == 1,
 	}
 	bc.Constants = append(bc.Constants, fn)
 	return numInserts, nil
@@ -79,24 +88,40 @@ func Gosched(bc *ugo.Bytecode, callCount int64) (int, error) {
 
 type goschedFunc struct {
 	ugo.ObjectImpl
-	counter   int64
-	callCount int64
+	mu            sync.Mutex
+	numCalls      uint64
+	counter       uint32
+	callThreshold uint32
+	sleep         bool
 }
+
+var _ ugo.ExCallerObject = (*goschedFunc)(nil)
 
 func (g *goschedFunc) String() string   { return "<gosched>" }
 func (g *goschedFunc) TypeName() string { return g.String() }
 func (g *goschedFunc) CanCall() bool    { return true }
 
 func (g *goschedFunc) Call(args ...ugo.Object) (ugo.Object, error) {
-	if atomic.AddInt64(&g.counter, 1) >= g.callCount {
-		atomic.StoreInt64(&g.counter, 0)
-		runtime.Gosched()
-	}
-	return ugo.Undefined, nil
+	return g.CallEx(ugo.Call{})
 }
 
-func (g *goschedFunc) NumCalls() int64 {
-	return atomic.LoadInt64(&g.counter)
+func (g *goschedFunc) CallEx(_ ugo.Call) (ugo.Object, error) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	g.numCalls++
+	g.counter++
+	if g.counter == g.callThreshold {
+		g.counter = 0
+
+		runtime.Gosched()
+
+		if g.sleep {
+			//lint:ignore SA1004 // Park the current goroutine.
+			time.Sleep(1) // I couldn't find another way to park the goroutine.
+		}
+	}
+	return ugo.Undefined, nil
 }
 
 type bytecodePatcher struct {
@@ -279,10 +304,7 @@ func (it *instsIterator) Next() bool {
 		it.err = fmt.Errorf("invalid opcode %d at %d", it.opcode, it.pos)
 		return false
 	}
-	it.offset = 0
-	for _, width := range ugo.OpcodeOperands[it.opcode] {
-		it.offset += width
-	}
+	it.offset = opWidths[it.opcode]
 	it.pos += it.offset + 1
 	return true
 }
@@ -350,10 +372,21 @@ func (sm *sourceMapper) InsertAt(pos, size int) {
 }
 
 func (sm *sourceMapper) MakeSourceMap() map[int]int {
-	// put length for map creation, it is faster
 	m := make(map[int]int, len(sm.keys))
 	for i, v := range sm.keys {
 		m[v] = sm.values[i]
 	}
 	return m
+}
+
+var opWidths = getOpWidths()
+
+func getOpWidths() (opWidths []int) {
+	opWidths = make([]int, len(ugo.OpcodeOperands))
+	for op := range ugo.OpcodeOperands {
+		for _, w := range ugo.OpcodeOperands[op] {
+			opWidths[op] += w
+		}
+	}
+	return opWidths
 }

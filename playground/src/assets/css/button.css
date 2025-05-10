@@ -12,7 +12,6 @@
 
 .button {
     display: inline-block;
-    *display: inline;
     zoom: 1;
     padding: 6px 20px;
     margin: 0;
@@ -179,7 +178,6 @@
 
 .button-group, .button-group li {
     display: inline-block;
-    *display: inline;
     zoom: 1;
 }
 

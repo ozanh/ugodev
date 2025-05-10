@@ -1,133 +1,40 @@
 {
   "name": "ugo-playground",
-  "version": "0.7.0",
   "private": true,
+  "version": "0.8.0",
   "description": "uGO Playground",
+  "type": "module",
   "author": {
     "name": "Ozan Hacıbekiroğlu"
   },
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint --fix",
-    "test:unit": "vue-cli-service test:unit",
-    "test": "vue-cli-service test:unit"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
   },
-  "main": "index.js",
   "dependencies": {
-    "comlink": "^4.4.1",
-    "core-js": "^3.30.1",
-    "mini-toastr": "^0.8.1",
-    "node-polyfill-webpack-plugin": "^2.0.1",
+    "comlink": "^4.4.2",
+    "mini-toastr": "^0.8.2",
     "prismjs": "git+https://github.com/ozanh/prism.git",
-    "vue": "^3.2.47",
+    "vue": "^3.5.13",
     "vue-prism-editor": "^2.0.0-alpha.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.21.4",
-    "@babel/eslint-parser": "^7.21.3",
-    "@babel/preset-env": "^7.21.4",
-    "@vue/cli-plugin-babel": "^5.0.8",
-    "@vue/cli-plugin-eslint": "^5.0.8",
-    "@vue/cli-plugin-unit-jest": "^5.0.8",
-    "@vue/cli-service": "^5.0.8",
-    "@vue/compiler-dom": "^3.0.1",
-    "@vue/compiler-sfc": "^3.2.47",
-    "@vue/eslint-config-standard": "^8.0.1",
-    "@vue/server-renderer": "^3.0.1",
-    "@vue/test-utils": "^2.3.2",
-    "@vue/vue3-jest": "^29.2.3",
-    "babel-jest": "^29.5.0",
-    "copy-webpack-plugin": "^11.0.0",
-    "eslint": "^8.39.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-vue": "^9.11.0",
-    "file-loader": "^6.2.0",
-    "identity-obj-proxy": "^3.0.0",
-    "jest": "^29.5.0",
-    "jest-raw-loader": "^1.0.1",
-    "license-checker-webpack-plugin": "^0.2.1",
-    "raw-loader": "^4.0.2",
-    "regenerator-runtime": "^0.13.11",
-    "sass": "^1.62.0",
-    "sass-loader": "^13.2.2",
-    "typescript": "^5.0.4",
-    "vue-loader": "^17.0.1",
-    "webpack": "5.72.0",
-    "worker-loader": "^3.0.8"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/recommended",
-      "eslint:recommended",
-      "@vue/standard"
-    ],
-    "parserOptions": {
-      "parser": "@babel/eslint-parser"
-    },
-    "overrides": [
-      {
-        "files": [
-          "**/__tests__/*.{j,t}s?(x)",
-          "**/tests/unit/**/*.spec.{j,t}s?(x)"
-        ],
-        "env": {
-          "jest": true
-        }
-      }
-    ],
-    "ignorePatterns": [
-      "wasm_exec.*js"
-    ]
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ],
-  "jest": {
-    "verbose": true,
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "src/**"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "vue"
-    ],
-    "moduleNameMapper": {
-      ".*wasm\\.worker": "<rootDir>/__mocks__/wasm.worker.js",
-      "mini-toastr": "<rootDir>/__mocks__/mini-toastr.js",
-      ".+\\.(css|less)$": "identity-obj-proxy",
-      "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "transform": {
-      ".*\\.(vue)$": "@vue/vue3-jest",
-      ".*\\.(js|jsx)$": "babel-jest",
-      ".*\\.ugo$": "jest-raw-loader"
-    },
-    "transformIgnorePatterns": [
-      "<rootDir>/node_modules/"
-    ],
-    "testMatch": [
-      "<rootDir>/tests/unit/**.spec.js"
-    ],
-    "preset": "@vue/cli-plugin-unit-jest"
-  },
-  "babel": {
-    "presets": [
-      "@vue/cli-plugin-babel/preset"
-    ]
-  },
-  "keywords": [
-    "uGO"
-  ],
-  "license": "MIT"
+    "@eslint/js": "^9.24.0",
+    "@vitejs/plugin-legacy": "^6.0.2",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "eslint": "^9.24.0",
+    "eslint-plugin-vue": "^10.0.0",
+    "globals": "^16.0.0",
+    "prettier": "^3.5.3",
+    "sass-embedded": "^1.86.3",
+    "terser": "^5.39.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.29.1",
+    "vite": "^6.2.0",
+    "vite-plugin-static-copy": "^2.3.0",
+    "vite-plugin-top-level-await": "^1.5.0",
+    "vue-eslint-parser": "^10.1.3"
+  }
 }
