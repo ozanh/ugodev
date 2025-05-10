@@ -3,7 +3,7 @@ module github.com/ozanh/ugodev
 go 1.19
 
 require (
-	github.com/ozanh/ugo v0.4.1-0.20250408085051-47310d6ee7aa
+	github.com/ozanh/ugo v0.5.0
 	github.com/stretchr/testify v1.10.0
 )
 
